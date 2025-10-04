@@ -1,0 +1,1931 @@
+API: Sunshine Conversations API v17.0.0
+Description: # Introduction
+
+<aside class="notice"><strong>Note:</strong> The documentation below applies to v2 of the API. For users wanting to access v1, please proceed <a href="https://docs.smooch.io/rest/v1">here</a> instead.
+</aside>
+
+Welcome to the Sunshine Conversations API. The API allows you to craft entirely unique messaging experiences for your app and website as well as talk to any backend or external service.
+
+The Sunshine Conversations API is designed according to REST principles. The API accepts JSON in request bodies and requires that the `content-type: application/json` header be specified for
+all such requests. The API will always respond with an object. Depending on context, resources may be returned as single objects or as arrays of objects, nested within the response object.
+
+## Regions
+
+Licensed Zendesk customers should use the following API host for all API requests, unless otherwise specified:
+
+```
+https://{subdomain}.zendesk.com/sc
+```
+
+For legacy Sunshine Conversations customers, see [regions](https://docs.smooch.io/guide/regions/) for the list of supported base URLs.
+
+<aside class="notice"><strong>Note:</strong> When configuring an API host, make sure to always use <code>https</code>. Some API clients can have unexpected behaviour when following redirects from <code>http</code> to <code>https</code>.</aside>
+
+## Errors
+
+Sunshine Conversations uses standard HTTP status codes to communicate errors. In general, a `2xx` status code indicates success while `4xx` indicates an error, in which case, the response body includes a JSON object which includes an array of errors, with a text `code` and `title` containing more details. Multiple errors can only be included in a `400 Bad Request`. A `5xx` status code indicates that something went wrong on our end.
+
+```javascript
+{
+   "errors":  [
+    {
+        "code": "unauthorized",
+        "title": "Authorization is required"
+    }
+   ]
+}
+```
+
+## API Version
+
+The latest version of the API is v2. Version v1.1 is still supported and you can continue using it but we encourage you to upgrade to the latest version. To learn more about API versioning at Sunshine Conversations, including instructions on how to upgrade to the latest version, [visit our docs](https://developer.zendesk.com/documentation/conversations/references/api-versioning/).
+
+## API Pagination and Records Limits
+
+All paginated endpoints support cursor-based pagination.
+
+### Cursor Pagination
+
+Cursor-based pagination is a common pagination strategy that avoids many of the pitfalls of offset–limit pagination. It works by returning a pointer to a specific item in the dataset. On subsequent requests, the server returns results after the given pointer.
+
+A `page[after]` or `page[before]` query string parameter may be provided, they are cursors pointing to a record id.
+
+The `page[after]` cursor indicates that only records **subsequent** to it should be returned.
+
+The `page[before]` cursor indicates that only records **preceding** it should be returned.
+
+**Only one** of `page[after]` or `page[before]` may be provided in a query, not both.
+
+In most endpoints, an optional `page[size]` query parameter may be passed to control the number of records returned by the request.
+
+## API Libraries
+
+Sunshine Conversations provides an official API library for [Java](https://github.com/zendesk/sunshine-conversations-java), with more languages to come. These helpful libraries wrap calls to the API and can make interfacing with Sunshine Conversations easier.
+
+## Postman Collection
+
+<a style="display:inline-block;background:url(https://run.pstmn.io/button.svg);height:30px;width: 123px;" href="https://docs.smooch.io/sunco-openapi/postman_collection.json"></a>
+
+In addition to API libraries, Sunshine Conversations also has a Postman collection that can be used for development or testing purposes. See the [guide](https://developer.zendesk.com/documentation/conversations/references/openapi-specification/) for information on how to install and use the collection in your Postman client.
+
+## Rate Limits
+
+Sunshine Conversations APIs are subject to rate limiting. If the rate limit is exceeded a `429 Too Many Requests` HTTP status code may be returned. We apply rate limits to prevent abuse, spam, denial-of-service attacks, and similar issues. Our goal is to keep the limits high enough so that any application using the platform as intended will not encounter them. However usage spikes do occur and encountering a rate limit may be unavoidable. In order to avoid production outages, you should implement `429` retry logic using exponential backoff and jitter.
+
+## Conversation Size Limits
+
+Conversations are limited to 30,000 messages. Once you reach this maximum, a `423 Locked` HTTP status code is returned when trying to post a new message. To allow more messages to be sent to the affected conversation, you must [delete all messages](https://developer.zendesk.com/api-reference/conversations/#operation/DeleteAllMessages) to make room.
+
+## Request Size Limits
+
+The Sunshine Conversations API imposes the following size limits on HTTP requests:
+
+| Request Type | Limit |
+| ------------ | ----- |
+| JSON         | 100kb |
+| File upload  | 50mb  |
+
+## Authorization
+
+This is an overview of how authorization works with the Sunshine Conversations API. Sunshine Conversations allows basic authentication or JSON Web Tokens (JWTs) as authentication methods for server-to-server calls. [See below](#section/Introduction/Authentication) for more details.
+
+There are three authorization scopes available for the v2 API: `integration`, `app`, and `account`.
+
+| Scope       | Availability                                | Authorized Methods                              |
+| ----------- | ------------------------------------------- | ----------------------------------------------- |
+| account     | Sunshine Conversations direct accounts only | All methods                                     |
+| app         | All account types                           | All methods besides Account Provisioning        |
+| integration | All account types                           | Users, Conversations, Attachments, and Webhooks |
+
+<aside class="notice"><strong>Note:</strong> An additional scope of <code>user</code> is used for <a href="https://developer.zendesk.com/documentation/conversations/messaging-platform/users/authenticating-users/">authenticating users</a> on the Zendesk Messaging SDKs. This scope, however, cannot be used with the v2 API.</aside>
+
+## Authentication
+
+To authenticate requests to the API, you will need an API key, composed of a key id and a secret.
+For an overview of how authentication works in Sunshine Conversations and instructions on how to generate an API key, see [API authentication](https://developer.zendesk.com/documentation/conversations/getting-started/api-authentication/).
+
+API requests can be authenticated in two ways:
+
+- With Basic authentication you can make requests using an API key directly.
+- With JSON Web Tokens (JWTs) you sign tokens with an API key, which are then used to authenticate with the API. See [When to Use JWTs](https://developer.zendesk.com/documentation/conversations/getting-started/api-authentication/#when-to-use-jwts) to learn if JWTs are relevant for your usage.
+- Before using an API key in production, make sure to familiarize yourself with best practices on how to [securely handle credentials](https://developer.zendesk.com/documentation/conversations/getting-started/api-authentication/#secure-credential-handling).
+
+### Basic Authentication
+
+API requests can be authenticated with [basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication) using an API key. The key id is used as the username and the secret as the password. The scope of access is determined by the owner of the API key. See the [guide](https://developer.zendesk.com/documentation/conversations/getting-started/api-authentication/#access-scopes) for more details.
+
+### JWTs
+
+JSON Web Tokens (JWTs) are an industry standard authentication method. The full specification is described [here](https://tools.ietf.org/html/rfc7519), and a set of supported JWT libraries for a variety of languages and platforms can be found at http://jwt.io. To summarize, a JWT is composed of a header, a payload, and a signature. The payload contains information called claims which describe the subject to whom the token was issued.
+The JWT itself is transmitted via the HTTP `authorization` header. The token should be prefixed with “Bearer” followed by a space. For example: `Bearer your-jwt`.
+To generate a JWT, you need an API key, which is composed of a key ID and a secret. The key ID is included in a JWT’s header, as the `kid` property, while the secret is used to sign the JWT.
+For more in-depth coverage, see the [guide](https://developer.zendesk.com/documentation/conversations/getting-started/api-authentication/#jwt-authentication).
+
+#### Header
+
+The JWT header must contain the key id (kid) of the API key that is used to sign it. The algorithm (alg) used should be HS256. Unsigned JWTs are not accepted.
+
+```javascript
+{
+    "alg": "HS256",
+    "typ": "JWT",
+    "kid": "act_5963ceb97cde542d000dbdb1"
+}
+```
+
+#### Payload
+
+The JWT payload must include a scope claim which specifies the caller’s scope of access.
+
+- account-scoped JWTs must be generated with an API key associated with a Sunshine Conversations account (act*) or service account (svc*).
+
+```javascript
+{
+    "scope": "account"
+}
+```
+
+- app-scoped JWTs can be generated with an API key associated with an app (app\_).
+
+```javascript
+{
+   "scope": "app"
+}
+```
+
+
+Base URL: https://api.smooch.io
+Additional URLs:
+  - https://api.eu-1.smooch.io (European Union server (for legacy Sunshine Conversations only))
+  - https://{subdomain}.zendesk.com/sc (Your Zendesk subdomain)
+
+ENDPOINTS:
+
+POST /v2/apps
+  Summary: Create App
+  Request Body:
+    Content: application/json
+    Schema: appCreateBody
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: appResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    402: Payment required
+      Content: application/json
+      Schema: errorResponse
+
+GET /v2/apps
+  Summary: List Apps
+  Parameters:
+    - undefined (undefined, unknown (optional)): No description
+    - undefined (undefined, unknown (optional)): No description
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: appListResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    403: Forbidden
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}
+
+GET /v2/apps/{appId}
+  Summary: Get App
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: appResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PATCH /v2/apps/{appId}
+  Summary: Update App
+  Request Body:
+    Content: application/json
+    Schema: appUpdateBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: appResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}
+  Summary: Delete App
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/keys
+
+POST /v2/apps/{appId}/keys
+  Summary: Create App Key
+  Request Body:
+    Content: application/json
+    Schema: Object (displayName)
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: appKeyResponse
+
+GET /v2/apps/{appId}/keys
+  Summary: List App Keys
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: appKeyListResponse
+
+PARAMETERS /v2/apps/{appId}/keys/{keyId}
+
+GET /v2/apps/{appId}/keys/{keyId}
+  Summary: Get App Key
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: appKeyResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/keys/{keyId}
+  Summary: Delete App Key
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/attachments
+
+POST /v2/apps/{appId}/attachments
+  Summary: Upload Attachment
+  Request Body:
+    Content: multipart/form-data
+    Schema: attachmentUploadBody
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: attachmentResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/attachments/remove
+
+POST /v2/apps/{appId}/attachments/remove
+  Summary: Delete Attachment
+  Request Body:
+    Content: application/json
+    Schema: attachmentDeleteBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations
+
+POST /v2/apps/{appId}/conversations
+  Summary: Create Conversation
+  Request Body:
+    Content: application/json
+    Schema: conversationCreateBody
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: conversationResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+GET /v2/apps/{appId}/conversations
+  Summary: List Conversations
+  Parameters:
+    - undefined (undefined, unknown (optional)): No description
+    - undefined (undefined, unknown (optional)): No description
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: conversationListResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}
+
+GET /v2/apps/{appId}/conversations/{conversationId}
+  Summary: Get Conversation
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: conversationResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PATCH /v2/apps/{appId}/conversations/{conversationId}
+  Summary: Update Conversation
+  Request Body:
+    Content: application/json
+    Schema: conversationUpdateBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: conversationResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/conversations/{conversationId}
+  Summary: Delete Conversation
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/join
+
+POST /v2/apps/{appId}/conversations/{conversationId}/join
+  Summary: Join Conversation
+  Request Body:
+    Content: application/json
+    Schema: participantJoinBody
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: Object (participant)
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/participants
+
+GET /v2/apps/{appId}/conversations/{conversationId}/participants
+  Summary: List Participants
+  Parameters:
+    - undefined (undefined, unknown (optional)): No description
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: participantListResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/leave
+
+POST /v2/apps/{appId}/conversations/{conversationId}/leave
+  Summary: Leave Conversation
+  Request Body:
+    Content: application/json
+    Schema: participantLeaveBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/messages
+
+POST /v2/apps/{appId}/conversations/{conversationId}/messages
+  Summary: Post Message
+  Request Body:
+    Content: application/json
+    Schema: messagePost
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: messagePostResponse
+    423: Message limit reached
+<aside class="notice"><strong>Note:</strong> To learn more about the conversation message limit, consult the section in the introduction linked <a href="#section/Introduction/Conversation-Size-Limits">here</a>.</aside>
+
+      Content: application/json
+      Schema: errorResponse
+
+GET /v2/apps/{appId}/conversations/{conversationId}/messages
+  Summary: List Messages
+  Parameters:
+    - undefined (undefined, unknown (optional)): No description
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: messageListResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/conversations/{conversationId}/messages
+  Summary: Delete All Messages
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/messages/{messageId}
+
+DELETE /v2/apps/{appId}/conversations/{conversationId}/messages/{messageId}
+  Summary: Delete Message
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/activity
+
+POST /v2/apps/{appId}/conversations/{conversationId}/activity
+  Summary: Post Activity
+  Request Body:
+    Content: application/json
+    Schema: activityPost
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/acceptControl
+
+POST /v2/apps/{appId}/conversations/{conversationId}/acceptControl
+  Summary: Accept Control
+  Request Body:
+    Content: application/json
+    Schema: acceptControlBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    403: Forbidden
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/offerControl
+
+POST /v2/apps/{appId}/conversations/{conversationId}/offerControl
+  Summary: Offer Control
+  Request Body:
+    Content: application/json
+    Schema: offerControlBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/passControl
+
+POST /v2/apps/{appId}/conversations/{conversationId}/passControl
+  Summary: Pass Control
+  Request Body:
+    Content: application/json
+    Schema: passControlBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/releaseControl
+
+POST /v2/apps/{appId}/conversations/{conversationId}/releaseControl
+  Summary: Release Control
+  Request Body:
+    Content: application/json
+    Schema: releaseControlBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    403: Forbidden
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/download
+
+POST /v2/apps/{appId}/conversations/{conversationId}/download
+  Summary: Download Message Ref
+  Request Body:
+    Content: application/json
+    Schema: downloadMessageRefBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+
+PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/conversionEvents
+
+POST /v2/apps/{appId}/conversations/{conversationId}/conversionEvents
+  Summary: Post Conversion Events
+  Request Body:
+    Content: application/json
+    Schema: conversionEventsBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: conversionEventsResponse
+
+PARAMETERS /v2/apps/{appId}/integrations
+
+POST /v2/apps/{appId}/integrations
+  Summary: Create Integration
+  Request Body:
+    Content: application/json
+    Schema: integration
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: Unknown
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+
+GET /v2/apps/{appId}/integrations
+  Summary: List Integrations
+  Parameters:
+    - undefined (undefined, unknown (optional)): No description
+    - undefined (undefined, unknown (optional)): No description
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: integrationListResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/integrations/{integrationId}
+
+GET /v2/apps/{appId}/integrations/{integrationId}
+  Summary: Get Integration
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: Unknown
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PATCH /v2/apps/{appId}/integrations/{integrationId}
+  Summary: Update Integration
+  Request Body:
+    Content: application/json
+    Schema: integrationUpdate
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: Unknown
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/integrations/{integrationId}
+  Summary: Delete Integration
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/keys
+
+POST /v2/apps/{appId}/integrations/{integrationId}/keys
+  Summary: Create Integration Key
+  Request Body:
+    Content: application/json
+    Schema: Object (displayName)
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: integrationApiKeyResponse
+
+GET /v2/apps/{appId}/integrations/{integrationId}/keys
+  Summary: List Integration Keys
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: Object (keys)
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/keys/{keyId}
+
+GET /v2/apps/{appId}/integrations/{integrationId}/keys/{keyId}
+  Summary: Get Integration Key
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: integrationApiKeyResponse
+
+DELETE /v2/apps/{appId}/integrations/{integrationId}/keys/{keyId}
+  Summary: Delete Integration Key
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+
+PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/webhooks
+
+POST /v2/apps/{appId}/integrations/{integrationId}/webhooks
+  Summary: Create Webhook
+  Request Body:
+    Content: application/json
+    Schema: webhookCreateBody
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: webhookResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    403: Forbidden
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+GET /v2/apps/{appId}/integrations/{integrationId}/webhooks
+  Summary: List Webhooks
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: webhookListResponse
+    403: Forbidden
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/webhooks/{webhookId}
+
+GET /v2/apps/{appId}/integrations/{integrationId}/webhooks/{webhookId}
+  Summary: Get Webhook
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: webhookResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PATCH /v2/apps/{appId}/integrations/{integrationId}/webhooks/{webhookId}
+  Summary: Update Webhook
+  Request Body:
+    Content: application/json
+    Schema: webhookBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: webhookResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/integrations/{integrationId}/webhooks/{webhookId}
+  Summary: Delete Webhook
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/switchboards
+
+POST /v2/apps/{appId}/switchboards
+  Summary: Create Switchboard
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: switchboardResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+GET /v2/apps/{appId}/switchboards
+  Summary: List Switchboards
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: switchboardListResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/switchboards/{switchboardId}
+
+PATCH /v2/apps/{appId}/switchboards/{switchboardId}
+  Summary: Update Switchboard
+  Request Body:
+    Content: application/json
+    Schema: switchboardUpdateBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: switchboardResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/switchboards/{switchboardId}
+  Summary: Delete Switchboard
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations
+
+POST /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations
+  Summary: Create Switchboard Integration
+  Request Body:
+    Content: application/json
+    Schema: switchboardIntegrationCreateBody
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: switchboardIntegrationResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+GET /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations
+  Summary: List Switchboard Integrations
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: switchboardIntegrationListResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations/{switchboardIntegrationId}
+
+PATCH /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations/{switchboardIntegrationId}
+  Summary: Update Switchboard Integration
+  Request Body:
+    Content: application/json
+    Schema: switchboardIntegrationUpdateBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: switchboardIntegrationResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations/{switchboardIntegrationId}
+  Summary: Delete Switchboard Integration
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/users
+
+POST /v2/apps/{appId}/users
+  Summary: Create User
+  Request Body:
+    Content: application/json
+    Schema: userCreateBody
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: userResponse
+    409: Conflict
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}
+
+GET /v2/apps/{appId}/users/{userIdOrExternalId}
+  Summary: Get User
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: userResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PATCH /v2/apps/{appId}/users/{userIdOrExternalId}
+  Summary: Update User
+  Request Body:
+    Content: application/json
+    Schema: userUpdateBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: userResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+DELETE /v2/apps/{appId}/users/{userIdOrExternalId}
+  Summary: Delete User
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/clients
+
+POST /v2/apps/{appId}/users/{userIdOrExternalId}/clients
+  Summary: Create Client
+  Request Body:
+    Content: application/json
+    Schema: clientCreate
+  Responses:
+    201: Created
+      Content: application/json
+      Schema: Object (client)
+
+GET /v2/apps/{appId}/users/{userIdOrExternalId}/clients
+  Summary: List Clients
+  Parameters:
+    - undefined (undefined, unknown (optional)): No description
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: clientListResponse
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/clients/{clientId}
+
+DELETE /v2/apps/{appId}/users/{userIdOrExternalId}/clients/{clientId}
+  Summary: Remove Client
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+    400: Bad request
+      Content: application/json
+      Schema: errorResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/devices
+
+GET /v2/apps/{appId}/users/{userIdOrExternalId}/devices
+  Summary: List Devices
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: deviceListResponse
+
+PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/devices/{deviceId}
+
+GET /v2/apps/{appId}/users/{userIdOrExternalId}/devices/{deviceId}
+  Summary: Get Device
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: deviceResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/personalinformation
+
+DELETE /v2/apps/{appId}/users/{userIdOrExternalId}/personalinformation
+  Summary: Delete User Personal Information
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: userResponse
+    404: Not found
+      Content: application/json
+      Schema: errorResponse
+
+PARAMETERS /v2/apps/{appId}/users/{zendeskId}/sync
+
+POST /v2/apps/{appId}/users/{zendeskId}/sync
+  Summary: Synchronize User
+  Request Body:
+    Content: application/json
+    Schema: syncUserBody
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: userResponse
+
+GET /v2/tokenInfo
+  Summary: Get Token Info
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: appResponse
+
+GET /oauth/authorize
+  Summary: Authorize
+  Parameters:
+    - undefined (undefined, unknown (optional)): No description
+    - undefined (undefined, unknown (optional)): No description
+    - undefined (undefined, unknown (optional)): No description
+    - undefined (undefined, unknown (optional)): No description
+  Responses:
+    302: Found
+      Content: text/plain
+      Schema: string
+
+POST /oauth/token
+  Summary: Get Token
+  Request Body:
+    Content: application/json
+    Schema: Object (code, grant_type, client_id...)
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: Unknown
+
+DELETE /oauth/authorization
+  Summary: Revoke Access
+  Responses:
+    200: Ok
+      Content: application/json
+      Schema: object
+
+SCHEMAS:
+
+page:
+  - after: string
+  - before: string
+  - size: integer
+
+displayName:
+
+appSettings:
+  - conversationRetentionSeconds: integer
+  - maskCreditCardNumbers: boolean
+  - useAnimalNames: boolean
+  - echoPostback: boolean
+  - ignoreAutoConversationStart: boolean
+  - multiConvoEnabled: boolean
+  - appLocalizationEnabled: boolean
+
+metadata:
+
+app:
+  - id: string
+  - displayName: object
+  - settings: object
+  - metadata: object
+
+meta:
+  - hasMore: boolean
+  - afterCursor: string
+  - beforeCursor: string
+
+links:
+  - prev: string
+  - next: string
+
+appListResponse:
+  - apps: array
+  - meta: object
+  - links: object
+
+error:
+  - code: string
+  - title: string
+
+errorResponse:
+  - errors: array
+
+appCreateBody:
+  - displayName: object (required)
+  - settings: object
+  - metadata: object
+
+appResponse:
+  - app: object
+
+appUpdateBody:
+  - displayName: object
+  - settings: object
+  - metadata: object
+
+appKey:
+  - id: string
+  - displayName: string
+  - secret: string
+
+appKeyListResponse:
+  - keys: array
+
+appKeyResponse:
+  - key: object
+
+attachmentUploadBody:
+  - source: string (format: binary) (required)
+
+attachmentSchema:
+  - mediaUrl: string
+  - mediaType: string
+
+attachmentResponse:
+  - attachment: object
+
+attachmentDeleteBody:
+  - mediaUrl: string (required)
+
+conversationType:
+
+name:
+
+switchboardIntegrationId:
+
+switchboardIntegrationType:
+
+switchboardIntegrationWebhook:
+  - id: string
+  - name: object
+  - integrationId: object
+  - integrationType: object
+
+conversationTruncated:
+  - id: string
+  - type: object
+  - metadata: object
+  - activeSwitchboardIntegration: object
+  - pendingSwitchboardIntegration: object
+
+description:
+
+icon:
+
+conversation:
+  allOf composition
+
+conversationListResponse:
+  - conversations: array
+  - meta: object
+  - links: object
+
+participantSubSchema:
+  anyOf composition
+
+conversationCreateBody:
+  - type: object (required)
+  - participants: array
+  - displayName: object
+  - description: object
+  - iconUrl: object
+  - metadata: object
+
+conversationResponse:
+  - conversation: object
+
+conversationUpdateBody:
+  - displayName: object
+  - description: object
+  - iconUrl: object
+  - metadata: object
+
+participantJoinBody:
+  allOf composition
+
+clientType:
+
+clientAssociation:
+  - type: object
+  - clientId: string
+
+participant:
+  - id: string
+  - userId: string
+  - unreadCount: integer
+  - clientAssociations: array
+  - userExternalId: string
+  - lastRead: string
+
+participantListResponse:
+  - participants: array
+  - meta: object
+  - links: object
+
+participantLeaveBody:
+  oneOf composition
+
+author:
+  - type: string (required)
+  - subtypes: array
+  - userId: string
+  - userExternalId: string
+  - displayName: string
+  - avatarUrl: object
+
+ticketClosed:
+  - type: string (required)
+  - data: object
+
+transferToEmail:
+  - type: string (required)
+  - data: object
+
+activityMessage:
+  oneOf composition
+
+htmlText:
+
+markdownText:
+
+buy:
+  - type: string (required)
+  - text: string (required)
+  - amount: integer (required)
+  - currency: string
+  - metadata: object
+
+extraChannelOptions:
+  - messenger: object
+
+link:
+  - type: string (required)
+  - uri: string (required)
+  - text: string (required)
+  - default: boolean
+  - metadata: object
+  - extraChannelOptions: object
+
+locationRequest:
+  - type: string (required)
+  - text: string (required)
+  - metadata: object
+
+postback:
+  - type: string (required)
+  - text: string (required)
+  - payload: string (required)
+  - metadata: object
+
+reply:
+  - type: string (required)
+  - text: string (required)
+  - payload: string (required)
+  - metadata: object
+  - iconUrl: string
+
+webview:
+  - type: string (required)
+  - uri: string (required)
+  - text: string (required)
+  - default: boolean
+  - metadata: object
+  - extraChannelOptions: object
+  - size: string
+  - fallback: string (required)
+  - openOnReceive: boolean
+
+action:
+  oneOf composition
+
+textMessage:
+  - type: string (required)
+  - text: string
+  - htmlText: object
+  - blockChatInput: boolean
+  - markdownText: object
+  - actions: array
+  - payload: string
+
+actionSubset:
+  oneOf composition
+
+item:
+  - title: string (required)
+  - description: string
+  - mediaUrl: string (format: uri)
+  - mediaType: string
+  - altText: string
+  - size: string
+  - actions: array (required)
+  - metadata: object
+
+carouselMessage:
+  - type: string (required)
+  - text: string
+  - blockChatInput: boolean
+  - items: array (required)
+  - displaySettings: object
+
+fileMessage:
+  - type: string (required)
+  - mediaUrl: string (format: uri) (required)
+  - mediaSize: number
+  - mediaType: string
+  - altText: string
+  - text: string
+  - blockChatInput: boolean
+  - htmlText: object
+  - markdownText: object
+  - attachmentId: string
+
+field:
+  - type: string (required)
+  - name: string (required)
+  - label: string (required)
+  - text: string
+  - email: string
+  - select: array
+
+formOptions:
+  Array of object
+
+formMessageField:
+  allOf composition
+
+formMessage:
+  - type: string (required)
+  - submitted: boolean
+  - blockChatInput: boolean
+  - fields: array (required)
+
+formResponseMessageField:
+  allOf composition
+
+formResponseMessage:
+  - type: string (required)
+  - fields: array (required)
+  - textFallback: string
+
+imageMessage:
+  - type: string (required)
+  - mediaUrl: string (format: uri) (required)
+  - mediaType: string
+  - mediaSize: number
+  - altText: string
+  - text: string
+  - blockChatInput: boolean
+  - htmlText: object
+  - markdownText: object
+  - actions: array
+  - attachmentId: string
+
+listMessage:
+  - type: string (required)
+  - blockChatInput: boolean
+  - items: array (required)
+  - actions: array
+
+locationMessage:
+  - type: string (required)
+  - text: string
+  - blockChatInput: boolean
+  - coordinates: object (required)
+  - location: object
+
+templateMessage:
+  - type: string (required)
+  - blockChatInput: boolean
+  - template: object (required)
+
+content:
+  oneOf composition
+
+client:
+  - id: string
+  - type: object
+  - status: string
+  - integrationId: string
+  - externalId: string
+  - lastSeen: string
+  - linkedAt: string
+  - displayName: string
+  - avatarUrl: string (format: uri)
+  - info: object
+  - raw: object
+
+device:
+  - id: string
+  - type: string
+  - guid: string
+  - clientId: string
+  - status: string
+  - integrationId: string
+  - lastSeen: string
+  - pushNotificationToken: string
+  - info: object
+  - appVersion: string
+
+source:
+  - type: string (required)
+  - integrationId: string
+  - originalMessageId: string
+  - originalMessageTimestamp: string
+  - client: object
+  - device: object
+
+message:
+  - id: string
+  - received: string
+  - author: object
+  - activity: object
+  - content: object
+  - source: object
+  - quotedMessage: object
+  - metadata: object
+  - deleted: boolean
+
+quotedMessageMessage:
+  - type: string (required)
+  - message: object
+
+quotedMessageExternalMessageId:
+  - type: string (required)
+  - externalMessageId: string
+
+quotedMessage:
+  oneOf composition
+
+messageListResponse:
+  - messages: array
+  - meta: object
+  - links: object
+
+destination:
+  oneOf composition
+
+appleMessageOverridePayload:
+  - payload: object
+  - withCapabilities: array
+
+messageOverridePayload:
+  - payload: object
+
+messageOverride:
+  anyOf composition
+
+messagePost:
+  - author: object (required)
+  - content: object (required)
+  - destination: object
+  - metadata: object
+  - override: object
+  - schema: string
+
+messagePostResponse:
+  - messages: array
+
+activityTypes:
+  - type: string
+
+activityPost:
+  allOf composition
+
+acceptControlBody:
+  - metadata: object
+
+offerControlBody:
+  - switchboardIntegration: string (required)
+  - metadata: object
+
+passControlBody:
+  - switchboardIntegration: string (required)
+  - reason: string
+  - metadata: object
+
+releaseControlBody:
+  - reason: string
+  - metadata: object
+
+downloadMessageRefBody:
+  allOf composition
+
+metaConversionEvent:
+  - payload: object (required)
+
+conversionEventsBody:
+  oneOf composition
+
+conversionEvents:
+  - datasetId: string
+  - eventsReceived: integer
+
+conversionEventsResponse:
+  - conversionEvents: object
+
+integration:
+  - id: string
+  - type: string (required)
+  - status: object
+  - displayName: string
+
+defaultResponderId:
+  - defaultResponderId: string
+
+defaultResponder:
+  - defaultResponder: object
+
+android:
+  allOf composition
+
+apple:
+  allOf composition
+
+target:
+
+triggers:
+  Array of string
+
+includeFullUser:
+
+includeFullSource:
+
+webhook:
+  - id: string
+  - version: string
+  - target: object (required)
+  - triggers: object (required)
+  - secret: string
+  - includeFullUser: object
+  - includeFullSource: object
+
+custom:
+  allOf composition
+
+instagram:
+  allOf composition
+
+ios:
+  allOf composition
+
+line:
+  allOf composition
+
+mailgun:
+  allOf composition
+
+messagebird:
+  allOf composition
+
+messenger:
+  allOf composition
+
+telegram:
+  allOf composition
+
+twilio:
+  allOf composition
+
+twitter:
+  allOf composition
+
+unity:
+  allOf composition
+
+viber:
+  allOf composition
+
+prechatCapture:
+  - avatarUrl: string
+  - enabled: boolean
+  - enableEmailLinking: boolean
+  - fields: array
+
+web:
+  allOf composition
+
+whatsapp:
+  allOf composition
+
+status:
+
+integrationListResponse:
+  - integrations: array
+  - meta: object
+  - links: object
+
+integrationResponse:
+  - integration: object
+
+integrationUpdateBase:
+  - displayName: string
+  - defaultResponderId: string
+
+androidUpdate:
+  allOf composition
+
+appleUpdate:
+  allOf composition
+
+customUpdate:
+  - displayName: string
+
+instagramUpdate:
+  allOf composition
+
+iosUpdate:
+  allOf composition
+
+lineUpdate:
+  allOf composition
+
+mailgunUpdate:
+  allOf composition
+
+messageBirdUpdate:
+  allOf composition
+
+messengerUpdate:
+  allOf composition
+
+telegramUpdate:
+  allOf composition
+
+twilioUpdate:
+  allOf composition
+
+twitterUpdate:
+  allOf composition
+
+unityUpdate:
+  allOf composition
+
+viberUpdate:
+  allOf composition
+
+webUpdate:
+  allOf composition
+
+whatsAppUpdate:
+  allOf composition
+
+integrationUpdate:
+  oneOf composition
+
+apiKey:
+  - id: string
+  - displayName: object
+  - secret: string
+
+integrationApiKeyResponse:
+  - key: object
+
+webhookListResponse:
+  - webhooks: array
+
+webhookBody:
+  - target: object
+  - triggers: object
+  - includeFullUser: object
+  - includeFullSource: object
+
+webhookCreateBody:
+  allOf composition
+
+webhookResponse:
+  - webhook: object
+
+enabled:
+
+defaultSwitchboardIntegrationId:
+
+switchboard:
+  - id: string (required)
+  - enabled: object (required)
+  - defaultSwitchboardIntegrationId: object
+
+switchboardListResponse:
+  - switchboards: array
+
+switchboardResponse:
+  - switchboard: object
+
+switchboardUpdateBody:
+  - enabled: object
+  - defaultSwitchboardIntegrationId: object
+
+deliverStandbyEvents:
+
+nextSwitchboardIntegrationId:
+
+messageHistoryCount:
+
+switchboardIntegration:
+  - id: string (required)
+  - name: object (required)
+  - integrationId: object (required)
+  - integrationType: object (required)
+  - deliverStandbyEvents: object (required)
+  - nextSwitchboardIntegrationId: object
+  - messageHistoryCount: object
+
+switchboardIntegrationListResponse:
+  - switchboardIntegrations: array
+
+switchboardIntegrationCreateBody:
+  - name: object (required)
+  - integrationId: object
+  - integrationType: object
+  - deliverStandbyEvents: object
+  - nextSwitchboardIntegrationId: object
+  - messageHistoryCount: object
+
+switchboardIntegrationResponse:
+  - switchboardIntegration: object
+
+switchboardIntegrationUpdateBody:
+  - name: object
+  - integrationId: object
+  - integrationType: object
+  - deliverStandbyEvents: object
+  - nextSwitchboardIntegrationId: object
+  - messageHistoryCount: object
+
+signedUpAt:
+
+toBeRetained:
+
+profile:
+  - givenName: string
+  - surname: string
+  - email: string (format: email)
+  - avatarUrl: string (format: uri)
+  - locale: string
+
+userCreateBody:
+  - externalId: string (required)
+  - signedUpAt: object
+  - toBeRetained: object
+  - profile: object
+  - metadata: object
+
+userTruncated:
+  - id: string
+  - authenticated: boolean
+  - externalId: string
+  - zendeskId: string
+
+identity:
+  - type: string
+  - value: string
+  - verification: string
+
+user:
+  allOf composition
+
+userResponse:
+  - user: object
+
+userUpdateBody:
+  - signedUpAt: object
+  - toBeRetained: object
+  - profile: object
+  - metadata: object
+
+clientListResponse:
+  - clients: array
+  - meta: object
+  - links: object
+
+matchCriteriaMailgun:
+  allOf composition
+
+matchCriteriaMessagebird:
+  allOf composition
+
+matchCriteriaTwilio:
+  allOf composition
+
+matchCriteriaWhatsapp:
+  allOf composition
+
+matchCriteriaBase:
+  - type: string (required)
+  - integrationId: string (required)
+  - primary: boolean
+
+matchCriteria:
+  oneOf composition
+
+clientCreate:
+  - matchCriteria: object (required)
+  - confirmation: object (required)
+  - target: object (required)
+
+deviceListResponse:
+  - devices: array
+
+deviceResponse:
+  - device: object
+
+syncUserBody:
+  - survivingZendeskId: string
+
+appSubSchema:
+  - id: string
+
+webhookSubSchema:
+  - id: string
+  - version: string
+
+eventSubSchema:
+  - id: string
+  - type: string
+  - createdAt: string
+
+sourceWebhook:
+  - type: string
+  - integrationId: string
+  - originalMessageId: string
+  - originalMessageTimestamp: string
+  - client: object
+  - device: object
+
+clientAddEvent:
+  allOf composition
+
+clientRemoveEvent:
+  allOf composition
+
+clientUpdateEvent:
+  allOf composition
+
+campaign:
+  - id: string
+
+sourceWithCampaignWebhook:
+  allOf composition
+
+referral:
+  - code: string
+  - details: object
+
+conversationCreateEvent:
+  allOf composition
+
+conversationJoinEvent:
+  allOf composition
+
+conversationLeaveEvent:
+  allOf composition
+
+conversationRemoveEvent:
+  allOf composition
+
+conversationMessageDeliveryPayload:
+  - user: object
+  - conversation: object
+  - message: object
+  - destination: object
+  - externalMessages: array
+  - isFinalEvent: boolean
+
+conversationMessageDeliveryChannelEvent:
+  allOf composition
+
+conversationMessageDeliveryFailureEvent:
+  allOf composition
+
+conversationMessageDeliveryUserEvent:
+  allOf composition
+
+authorWebhook:
+  - type: string (required)
+  - userId: string
+  - user: object
+
+messageWebhook:
+  - id: string
+  - received: string
+  - author: object
+  - content: object
+  - source: object
+  - quotedMessage: object
+  - metadata: object
+  - deleted: boolean
+
+conversationMessageEvent:
+  allOf composition
+
+postbackWebhook:
+  - payload: string
+  - metadata: object
+
+conversationPostbackEvent:
+  allOf composition
+
+activity:
+  allOf composition
+
+conversationReadEvent:
+  allOf composition
+
+conversationReferralEvent:
+  allOf composition
+
+conversationTypingEvent:
+  allOf composition
+
+switchboardAcceptControl:
+  allOf composition
+
+switchboardAcceptControlFailure:
+  allOf composition
+
+switchboardOfferControl:
+  allOf composition
+
+switchboardOfferControlFailure:
+  allOf composition
+
+switchboardPassControl:
+  allOf composition
+
+switchboardPassControlFailure:
+  allOf composition
+
+switchboardReleaseControl:
+  allOf composition
+
+userMergeEvent:
+  allOf composition
+
+userUpdateEvent:
+  allOf composition
+
+userRemoveEvent:
+  allOf composition
+
+SECURITY:
+- HTTP bearer authentication
+- HTTP basic authentication

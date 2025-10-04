@@ -1,0 +1,318 @@
+API: Swagger Petstore - OpenAPI 3.0 v1.0.27
+Description: This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
+Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
+You can now help us improve the API whether it's by making changes to the definition itself or to the code.
+That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+
+Some useful links:
+- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+
+Base URL: /api/v3
+
+ENDPOINTS:
+
+PUT /pet
+  Summary: Update an existing pet.
+  Request Body:
+    Content: application/json
+    Schema: Pet
+    Content: application/xml
+    Schema: Pet
+    Content: application/x-www-form-urlencoded
+    Schema: Pet
+  Responses:
+    200: Successful operation
+      Content: application/json
+      Schema: Pet
+      Content: application/xml
+      Schema: Pet
+    400: Invalid ID supplied
+    404: Pet not found
+    422: Validation exception
+    default: Unexpected error
+
+POST /pet
+  Summary: Add a new pet to the store.
+  Request Body:
+    Content: application/json
+    Schema: Pet
+    Content: application/xml
+    Schema: Pet
+    Content: application/x-www-form-urlencoded
+    Schema: Pet
+  Responses:
+    200: Successful operation
+      Content: application/json
+      Schema: Pet
+      Content: application/xml
+      Schema: Pet
+    400: Invalid input
+    422: Validation exception
+    default: Unexpected error
+
+GET /pet/findByStatus
+  Summary: Finds Pets by status.
+  Parameters:
+    - status (query, string (required)): Status values that need to be considered for filter
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: Array of Pet
+      Content: application/xml
+      Schema: Array of Pet
+    400: Invalid status value
+    default: Unexpected error
+
+GET /pet/findByTags
+  Summary: Finds Pets by tags.
+  Parameters:
+    - tags (query, array (required)): Tags to filter by
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: Array of Pet
+      Content: application/xml
+      Schema: Array of Pet
+    400: Invalid tag value
+    default: Unexpected error
+
+GET /pet/{petId}
+  Summary: Find pet by ID.
+  Parameters:
+    - petId (path, integer (required)): ID of pet to return
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: Pet
+      Content: application/xml
+      Schema: Pet
+    400: Invalid ID supplied
+    404: Pet not found
+    default: Unexpected error
+
+POST /pet/{petId}
+  Summary: Updates a pet in the store with form data.
+  Parameters:
+    - petId (path, integer (required)): ID of pet that needs to be updated
+    - name (query, string (optional)): Name of pet that needs to be updated
+    - status (query, string (optional)): Status of pet that needs to be updated
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: Pet
+      Content: application/xml
+      Schema: Pet
+    400: Invalid input
+    default: Unexpected error
+
+DELETE /pet/{petId}
+  Summary: Deletes a pet.
+  Parameters:
+    - api_key (header, string (optional)): No description
+    - petId (path, integer (required)): Pet id to delete
+  Responses:
+    200: Pet deleted
+    400: Invalid pet value
+    default: Unexpected error
+
+POST /pet/{petId}/uploadImage
+  Summary: Uploads an image.
+  Parameters:
+    - petId (path, integer (required)): ID of pet to update
+    - additionalMetadata (query, string (optional)): Additional Metadata
+  Request Body:
+    Content: application/octet-stream
+    Schema: string
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: ApiResponse
+    400: No file uploaded
+    404: Pet not found
+    default: Unexpected error
+
+GET /store/inventory
+  Summary: Returns pet inventories by status.
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: object
+    default: Unexpected error
+
+POST /store/order
+  Summary: Place an order for a pet.
+  Request Body:
+    Content: application/json
+    Schema: Order
+    Content: application/xml
+    Schema: Order
+    Content: application/x-www-form-urlencoded
+    Schema: Order
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: Order
+    400: Invalid input
+    422: Validation exception
+    default: Unexpected error
+
+GET /store/order/{orderId}
+  Summary: Find purchase order by ID.
+  Parameters:
+    - orderId (path, integer (required)): ID of order that needs to be fetched
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: Order
+      Content: application/xml
+      Schema: Order
+    400: Invalid ID supplied
+    404: Order not found
+    default: Unexpected error
+
+DELETE /store/order/{orderId}
+  Summary: Delete purchase order by identifier.
+  Parameters:
+    - orderId (path, integer (required)): ID of the order that needs to be deleted
+  Responses:
+    200: order deleted
+    400: Invalid ID supplied
+    404: Order not found
+    default: Unexpected error
+
+POST /user
+  Summary: Create user.
+  Request Body:
+    Content: application/json
+    Schema: User
+    Content: application/xml
+    Schema: User
+    Content: application/x-www-form-urlencoded
+    Schema: User
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: User
+      Content: application/xml
+      Schema: User
+    default: Unexpected error
+
+POST /user/createWithList
+  Summary: Creates list of users with given input array.
+  Request Body:
+    Content: application/json
+    Schema: Array of User
+  Responses:
+    200: Successful operation
+      Content: application/json
+      Schema: User
+      Content: application/xml
+      Schema: User
+    default: Unexpected error
+
+GET /user/login
+  Summary: Logs user into the system.
+  Parameters:
+    - username (query, string (optional)): The user name for login
+    - password (query, string (optional)): The password for login in clear text
+  Responses:
+    200: successful operation
+      Content: application/xml
+      Schema: string
+      Content: application/json
+      Schema: string
+    400: Invalid username/password supplied
+    default: Unexpected error
+
+GET /user/logout
+  Summary: Logs out current logged in user session.
+  Responses:
+    200: successful operation
+    default: Unexpected error
+
+GET /user/{username}
+  Summary: Get user by user name.
+  Parameters:
+    - username (path, string (required)): The name that needs to be fetched. Use user1 for testing
+  Responses:
+    200: successful operation
+      Content: application/json
+      Schema: User
+      Content: application/xml
+      Schema: User
+    400: Invalid username supplied
+    404: User not found
+    default: Unexpected error
+
+PUT /user/{username}
+  Summary: Update user resource.
+  Parameters:
+    - username (path, string (required)): name that need to be deleted
+  Request Body:
+    Content: application/json
+    Schema: User
+    Content: application/xml
+    Schema: User
+    Content: application/x-www-form-urlencoded
+    Schema: User
+  Responses:
+    200: successful operation
+    400: bad request
+    404: user not found
+    default: Unexpected error
+
+DELETE /user/{username}
+  Summary: Delete user resource.
+  Parameters:
+    - username (path, string (required)): The name that needs to be deleted
+  Responses:
+    200: User deleted
+    400: Invalid username supplied
+    404: User not found
+    default: Unexpected error
+
+SCHEMAS:
+
+Order:
+  - id: integer (format: int64)
+  - petId: integer (format: int64)
+  - quantity: integer (format: int32)
+  - shipDate: string (format: date-time)
+  - status: string
+  - complete: boolean
+
+Category:
+  - id: integer (format: int64)
+  - name: string
+
+User:
+  - id: integer (format: int64)
+  - username: string
+  - firstName: string
+  - lastName: string
+  - email: string
+  - password: string
+  - phone: string
+  - userStatus: integer (format: int32)
+
+Tag:
+  - id: integer (format: int64)
+  - name: string
+
+Pet:
+  - id: integer (format: int64)
+  - name: string (required)
+  - category: object
+  - photoUrls: array (required)
+  - tags: array
+  - status: string
+
+ApiResponse:
+  - code: integer (format: int32)
+  - type: string
+  - message: string
+
+SECURITY:
+- OAuth2 authentication
+- API Key authentication (header: api_key)

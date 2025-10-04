@@ -1,0 +1,53 @@
+{
+  "name": "openapi-to-llm-text",
+  "version": "1.0.0",
+  "description": "Convert OpenAPI specifications to LLM-optimized text",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^12.0.0",
+    "openapi-types": "^12.1.3"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.6",
+    "@types/node": "^24.6.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "yaml": "^2.8.1"
+  },
+  "keywords": [
+    "openapi",
+    "llm"
+  ],
+  "files": [
+    "dist"
+  ],
+  "author": {
+    "name": "Malcolm Kee",
+    "email": "malcolm.keeweesiong@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/malcolm-kee/openapi-to-llm-text.git"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@10.18.0"
+}
