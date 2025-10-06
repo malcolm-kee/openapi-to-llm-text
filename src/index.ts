@@ -26,7 +26,7 @@ export const openApiToLlmText = (openApi: OpenAPIDocument): string => {
         ? `${openApi.schemes?.[0] || 'https'}://${openApi.host}${openApi.basePath}`
         : undefined;
     sections.push(...formatHeader(openApi.info, baseUrl ? [{ url: baseUrl }] : undefined));
-    sections.push(...formatEndpoints(openApi.paths || {}));
+    sections.push(...formatEndpoints(openApi.paths || {}, openApi));
 
     if (openApi.definitions) {
       sections.push(...formatSchemas(openApi.definitions));
@@ -38,7 +38,7 @@ export const openApiToLlmText = (openApi: OpenAPIDocument): string => {
   } else {
     // OpenAPI 3.x
     sections.push(...formatHeader(openApi.info, openApi.servers));
-    sections.push(...formatEndpoints(openApi.paths || {}));
+    sections.push(...formatEndpoints(openApi.paths || {}, openApi));
 
     if (openApi.components?.schemas) {
       sections.push(...formatSchemas(openApi.components.schemas));
@@ -81,17 +81,12 @@ function formatHeader(
   return sections;
 }
 
-function formatEndpoints(paths: OpenAPIDocument['paths']): string[] {
+function formatEndpoints(paths: OpenAPIDocument['paths'], openApi: OpenAPIDocument): string[] {
   const sections: string[] = ['\nENDPOINTS:\n'];
   const pathEntries = Object.entries(paths || {});
 
   for (const [path, pathItem] of pathEntries) {
     if (!pathItem) continue;
-
-    const pathLevelParams = (pathItem as any).parameters;
-    if (pathLevelParams && pathLevelParams.length > 0) {
-      sections.push(`PARAMETERS ${path}\n`);
-    }
 
     const allPossibleMethods = [
       'get',
@@ -112,14 +107,19 @@ function formatEndpoints(paths: OpenAPIDocument['paths']): string[] {
       const operation = pathItem[method];
       if (!operation) continue;
 
-      sections.push(...formatOperation(method, path, operation));
+      sections.push(...formatOperation(method, path, operation, openApi));
     }
   }
 
   return sections;
 }
 
-function formatOperation(method: string, path: string, operation: any): string[] {
+function formatOperation(
+  method: string,
+  path: string,
+  operation: any,
+  openApi: OpenAPIDocument
+): string[] {
   const sections: string[] = [];
 
   sections.push(`${method.toUpperCase()} ${path}`);
@@ -129,7 +129,7 @@ function formatOperation(method: string, path: string, operation: any): string[]
   }
 
   if (operation.parameters && operation.parameters.length > 0) {
-    sections.push(...formatParameters(operation.parameters));
+    sections.push(...formatParameters(operation.parameters, openApi));
   }
 
   // OpenAPI 3.x has requestBody
@@ -146,36 +146,76 @@ function formatOperation(method: string, path: string, operation: any): string[]
   return sections;
 }
 
-function formatParameters(parameters: Array<ParameterObject | ReferenceObject>): string[] {
-  const sections: string[] = ['  Parameters:'];
+function resolveParameterRef(ref: string, openApi: OpenAPIDocument): any {
+  // $ref format: #/components/parameters/paramName
+  const parts = ref.split('/');
+  const paramName = parts[parts.length - 1];
+
+  if (!isSwagger2(openApi)) {
+    // OpenAPI 3.x
+    const openApi3 = openApi as OpenAPIV3.Document | OpenAPIV3_1.Document;
+    return openApi3.components?.parameters?.[paramName];
+  } else {
+    // Swagger 2.0 has parameters at the top level
+    return (openApi as any).parameters?.[paramName];
+  }
+}
+
+function formatParameters(
+  parameters: Array<ParameterObject | ReferenceObject>,
+  openApi: OpenAPIDocument
+): string[] {
+  const sections: string[] = [];
+  const paramLines: string[] = [];
 
   for (const param of parameters) {
     const p = param as any;
-    const required = p.required ? 'required' : 'optional';
+
+    // Resolve $ref parameters
+    let resolvedParam = p;
+    if ('$ref' in p) {
+      resolvedParam = resolveParameterRef(p.$ref, openApi);
+      if (!resolvedParam) {
+        continue; // Skip if we can't resolve the reference
+      }
+    }
+
+    const required = resolvedParam.required ? 'required' : 'optional';
 
     // Swagger 2.0 has type directly on parameter, OpenAPI 3.x has schema
     let type: string;
-    if (p.schema) {
-      type = resolveSchemaType(p.schema, { context: 'parameter' });
-    } else if (p.type) {
+    if (resolvedParam.schema) {
+      type = resolveSchemaType(resolvedParam.schema, { context: 'parameter' });
+    } else if (resolvedParam.type) {
       // Swagger 2.0 parameter
-      if (p.type === 'array') {
+      if (resolvedParam.type === 'array') {
         type = 'array';
-      } else if (p.type === 'file') {
+      } else if (resolvedParam.type === 'file') {
         type = 'file';
       } else {
-        type = p.type;
+        type = resolvedParam.type;
+        // Handle enum for Swagger 2.0 parameters
+        if (resolvedParam.enum && Array.isArray(resolvedParam.enum)) {
+          const enumValues = resolvedParam.enum.join(', ');
+          type += ` [${enumValues}]`;
+        }
       }
     } else {
       type = 'unknown';
     }
 
-    const description = p.description || 'No description';
-    sections.push(
-      `    - ${p.name || 'undefined'} (${
-        p.in || 'undefined'
+    const description = resolvedParam.description || 'No description';
+    paramLines.push(
+      `    - ${resolvedParam.name || 'undefined'} (${
+        resolvedParam.in || 'undefined'
       }, ${type} (${required})): ${description}`
     );
+  }
+
+  // Only include Parameters section if there are actual parameters to show
+  if (paramLines.length > 0) {
+    sections.push('  Parameters:');
+    sections.push(...paramLines);
   }
 
   return sections;
@@ -221,15 +261,27 @@ function formatResponses(responses: any): string[] {
 }
 
 function formatSchemas(schemas: { [key: string]: SchemaObject | ReferenceObject }): string[] {
-  const sections: string[] = ['SCHEMAS:\n'];
+  const sections: string[] = ['SCHEMAS:', '> * = required\n'];
 
   for (const [schemaName, schema] of Object.entries(schemas)) {
     const schemaObj = schema as SchemaObject;
-    sections.push(`${schemaName}:`);
 
-    const schemaLines = formatSchema(schemaObj, '  ');
-    sections.push(...schemaLines);
+    // Track virtual schemas generated for this parent
+    const virtualSchemasForParent: { [key: string]: SchemaObject } = {};
+    const result = formatSchema(schemaObj, '  ', schemaName, virtualSchemasForParent);
+
+    // Append type to schema name
+    sections.push(`${schemaName}: ${result.type}`);
+    sections.push(...result.lines);
     sections.push('');
+
+    // Add virtual schemas immediately after parent
+    for (const [virtualName, virtualSchema] of Object.entries(virtualSchemasForParent)) {
+      const virtualResult = formatSchema(virtualSchema, '  ', virtualName, {});
+      sections.push(`${virtualName}: ${virtualResult.type}`);
+      sections.push(...virtualResult.lines);
+      sections.push('');
+    }
   }
 
   return sections;
@@ -295,15 +347,60 @@ function resolveSchemaType(schema: any, options: ResolveSchemaTypeOptions): stri
 
   // Handle composition keywords
   if (schemaObj.allOf) {
-    return context === 'requestBody' ? 'allOf composition' : unknownValue;
+    if (context === 'requestBody') {
+      const schemas = schemaObj.allOf
+        .map((s: any) => {
+          if (s.$ref) return s.$ref.split('/').pop();
+          if (s.type === 'object' && s.properties) {
+            const props = Object.keys(s.properties);
+            return props.length <= 3
+              ? `{${props.join(', ')}}`
+              : `{${props.slice(0, 3).join(', ')}, ...}`;
+          }
+          return s.type || 'inline';
+        })
+        .join(', ');
+      return `allOf: [${schemas}]`;
+    }
+    return unknownValue;
   }
 
   if (schemaObj.oneOf) {
-    return context === 'requestBody' ? 'oneOf composition' : unknownValue;
+    if (context === 'requestBody') {
+      const schemas = schemaObj.oneOf
+        .map((s: any) => {
+          if (s.$ref) return s.$ref.split('/').pop();
+          if (s.type === 'object' && s.properties) {
+            const props = Object.keys(s.properties);
+            return props.length <= 3
+              ? `{${props.join(', ')}}`
+              : `{${props.slice(0, 3).join(', ')}, ...}`;
+          }
+          return s.type || 'inline';
+        })
+        .join(', ');
+      return `oneOf: [${schemas}]`;
+    }
+    return unknownValue;
   }
 
   if (schemaObj.anyOf) {
-    return context === 'requestBody' ? 'anyOf composition' : unknownValue;
+    if (context === 'requestBody') {
+      const schemas = schemaObj.anyOf
+        .map((s: any) => {
+          if (s.$ref) return s.$ref.split('/').pop();
+          if (s.type === 'object' && s.properties) {
+            const props = Object.keys(s.properties);
+            return props.length <= 3
+              ? `{${props.join(', ')}}`
+              : `{${props.slice(0, 3).join(', ')}, ...}`;
+          }
+          return s.type || 'inline';
+        })
+        .join(', ');
+      return `anyOf: [${schemas}]`;
+    }
+    return unknownValue;
   }
 
   // Handle arrays
@@ -341,12 +438,18 @@ function resolveSchemaType(schema: any, options: ResolveSchemaTypeOptions): stri
     return 'object';
   }
 
-  // Handle primitives with optional format
+  // Handle primitives with optional format and enum
   if (schemaObj.type === 'string' || schemaObj.type === 'integer' || schemaObj.type === 'number') {
-    if (includeFormat && schemaObj.format) {
-      return `${schemaObj.type} (format: ${schemaObj.format})`;
+    let typeStr = schemaObj.type;
+
+    if ((schemaObj as any).enum && Array.isArray((schemaObj as any).enum)) {
+      const enumValues = (schemaObj as any).enum.join(', ');
+      typeStr += ` [${enumValues}]`;
+    } else if (includeFormat && schemaObj.format) {
+      typeStr += ` (format: ${schemaObj.format})`;
     }
-    return schemaObj.type;
+
+    return typeStr;
   }
 
   // Handle other types
@@ -357,22 +460,69 @@ function resolveSchemaType(schema: any, options: ResolveSchemaTypeOptions): stri
   return unknownValue;
 }
 
-function formatSchema(schema: SchemaObject, indent: string): string[] {
+function formatSchema(
+  schema: SchemaObject,
+  indent: string,
+  parentSchemaName?: string,
+  virtualSchemasRegistry?: { [key: string]: SchemaObject }
+): { type: string; lines: string[] } {
   const lines: string[] = [];
 
   if (schema.allOf) {
-    lines.push(`${indent}allOf composition`);
-    return lines;
+    let inlineCounter = 1;
+    const schemas = schema.allOf
+      .map((s: any) => {
+        if (s.$ref) return s.$ref.split('/').pop();
+        if (s.type === 'object' && s.properties) {
+          // Create virtual schema
+          const virtualName = `<${parentSchemaName}__inline__${inlineCounter++}>`;
+          if (virtualSchemasRegistry) {
+            virtualSchemasRegistry[virtualName] = s;
+          }
+          return virtualName;
+        }
+        return s.type || 'inline';
+      })
+      .join(', ');
+    return { type: `allOf [${schemas}]`, lines };
   }
 
   if (schema.oneOf) {
-    lines.push(`${indent}oneOf composition`);
-    return lines;
+    let inlineCounter = 1;
+    const schemas = schema.oneOf
+      .map((s: any) => {
+        if (s.$ref) return s.$ref.split('/').pop();
+        if (s.type === 'object' && s.properties) {
+          // Create virtual schema
+          const virtualName = `<${parentSchemaName}__inline__${inlineCounter++}>`;
+          if (virtualSchemasRegistry) {
+            virtualSchemasRegistry[virtualName] = s;
+          }
+          return virtualName;
+        }
+        return s.type || 'inline';
+      })
+      .join(', ');
+    return { type: `oneOf [${schemas}]`, lines };
   }
 
   if (schema.anyOf) {
-    lines.push(`${indent}anyOf composition`);
-    return lines;
+    let inlineCounter = 1;
+    const schemas = schema.anyOf
+      .map((s: any) => {
+        if (s.$ref) return s.$ref.split('/').pop();
+        if (s.type === 'object' && s.properties) {
+          // Create virtual schema
+          const virtualName = `<${parentSchemaName}__inline__${inlineCounter++}>`;
+          if (virtualSchemasRegistry) {
+            virtualSchemasRegistry[virtualName] = s;
+          }
+          return virtualName;
+        }
+        return s.type || 'inline';
+      })
+      .join(', ');
+    return { type: `anyOf [${schemas}]`, lines };
   }
 
   if (schema.type === 'array') {
@@ -380,17 +530,15 @@ function formatSchema(schema: SchemaObject, indent: string): string[] {
     if (items && typeof items === 'object') {
       if ('$ref' in items) {
         const ref = items.$ref as string;
-        lines.push(`${indent}Array of ${ref.split('/').pop() || 'unknown'}`);
+        lines.push(`${indent}items: ${ref.split('/').pop() || 'unknown'}`);
       } else if (items.type === 'object') {
-        lines.push(`${indent}Array of object`);
+        lines.push(`${indent}items: object`);
       } else {
         const itemType = resolveSchemaType(items, { context: 'response' });
-        lines.push(`${indent}Array of ${itemType}`);
+        lines.push(`${indent}items: ${itemType}`);
       }
-    } else {
-      lines.push(`${indent}array`);
     }
-    return lines;
+    return { type: 'array', lines };
   }
 
   if (schema.properties) {
@@ -399,13 +547,44 @@ function formatSchema(schema: SchemaObject, indent: string): string[] {
     for (const [propName, propSchema] of Object.entries(schema.properties)) {
       const prop = propSchema as SchemaObject | ReferenceObject;
       const isRequired = required.includes(propName);
-      const requiredStr = isRequired ? ' (required)' : '';
+      const requiredMarker = isRequired ? '*' : '';
 
       let typeStr = '';
       if ('$ref' in prop) {
         typeStr = 'object';
-      } else if (prop.allOf || prop.oneOf || prop.anyOf) {
-        typeStr = 'object';
+      } else if (prop.allOf) {
+        const schemas = prop.allOf.map((s: any) => {
+          if (s.$ref) return s.$ref.split('/').pop();
+          return s.type || 'inline';
+        });
+        // If single schema and it's a $ref, just use the ref name
+        if (schemas.length === 1 && '$ref' in prop.allOf[0]) {
+          typeStr = schemas[0];
+        } else {
+          typeStr = `allOf [${schemas.join(', ')}]`;
+        }
+      } else if (prop.oneOf) {
+        const schemas = prop.oneOf.map((s: any) => {
+          if (s.$ref) return s.$ref.split('/').pop();
+          return s.type || 'inline';
+        });
+        // If single schema and it's a $ref, just use the ref name
+        if (schemas.length === 1 && '$ref' in prop.oneOf[0]) {
+          typeStr = schemas[0];
+        } else {
+          typeStr = `oneOf [${schemas.join(', ')}]`;
+        }
+      } else if (prop.anyOf) {
+        const schemas = prop.anyOf.map((s: any) => {
+          if (s.$ref) return s.$ref.split('/').pop();
+          return s.type || 'inline';
+        });
+        // If single schema and it's a $ref, just use the ref name
+        if (schemas.length === 1 && '$ref' in prop.anyOf[0]) {
+          typeStr = schemas[0];
+        } else {
+          typeStr = `anyOf [${schemas.join(', ')}]`;
+        }
       } else if (prop.type === 'array') {
         typeStr = 'array';
       } else if (prop.type === 'object') {
@@ -417,7 +596,10 @@ function formatSchema(schema: SchemaObject, indent: string): string[] {
         prop.type === 'boolean'
       ) {
         typeStr = prop.type;
-        if (prop.format) {
+        if ((prop as any).enum && Array.isArray((prop as any).enum)) {
+          const enumValues = (prop as any).enum.join(', ');
+          typeStr += ` [${enumValues}]`;
+        } else if (prop.format) {
           typeStr += ` (format: ${prop.format})`;
         }
       } else if (prop.type && typeof prop.type === 'string') {
@@ -428,9 +610,32 @@ function formatSchema(schema: SchemaObject, indent: string): string[] {
         typeStr = 'unknown';
       }
 
-      lines.push(`${indent}- ${propName}: ${typeStr}${requiredStr}`);
+      lines.push(`${indent}- ${propName}${requiredMarker}: ${typeStr}`);
     }
+    return { type: 'object', lines };
   }
 
-  return lines;
+  // Handle primitive types
+  if (
+    schema.type === 'string' ||
+    schema.type === 'integer' ||
+    schema.type === 'number' ||
+    schema.type === 'boolean'
+  ) {
+    let typeStr = schema.type;
+    if ((schema as any).enum && Array.isArray((schema as any).enum)) {
+      const enumValues = (schema as any).enum.join(', ');
+      typeStr += ` [${enumValues}]`;
+    } else if (schema.format) {
+      typeStr += ` (format: ${schema.format})`;
+    }
+    return { type: typeStr, lines };
+  }
+
+  // Handle other types
+  if (schema.type && typeof schema.type === 'string') {
+    return { type: schema.type, lines };
+  }
+
+  return { type: 'unknown', lines };
 }

@@ -174,37 +174,38 @@ POST /user
     default: successful operation
 
 SCHEMAS:
+> * = required
 
-ApiResponse:
+ApiResponse: object
   - code: integer (format: int32)
   - type: string
   - message: string
 
-Category:
+Category: object
   - id: integer (format: int64)
   - name: string
 
-Pet:
+Pet: object
   - id: integer (format: int64)
   - category: object
-  - name: string (required)
-  - photoUrls: array (required)
+  - name*: string
+  - photoUrls*: array
   - tags: array
-  - status: string
+  - status: string [available, pending, sold]
 
-Tag:
+Tag: object
   - id: integer (format: int64)
   - name: string
 
-Order:
+Order: object
   - id: integer (format: int64)
   - petId: integer (format: int64)
   - quantity: integer (format: int32)
   - shipDate: string (format: date-time)
-  - status: string
+  - status: string [placed, approved, delivered]
   - complete: boolean
 
-User:
+User: object
   - id: integer (format: int64)
   - username: string
   - firstName: string

@@ -180,8 +180,8 @@ POST /v2/apps
 GET /v2/apps
   Summary: List Apps
   Parameters:
-    - undefined (undefined, unknown (optional)): No description
-    - undefined (undefined, unknown (optional)): No description
+    - page (query, page (optional)): Contains parameters for applying cursor pagination.
+    - filter (query, Object (serviceAccountId) (optional)): Contains parameters for filtering the results.
   Responses:
     200: Ok
       Content: application/json
@@ -192,8 +192,6 @@ GET /v2/apps
     403: Forbidden
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}
 
 GET /v2/apps/{appId}
   Summary: Get App
@@ -231,8 +229,6 @@ DELETE /v2/apps/{appId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/keys
-
 POST /v2/apps/{appId}/keys
   Summary: Create App Key
   Request Body:
@@ -249,8 +245,6 @@ GET /v2/apps/{appId}/keys
     200: Ok
       Content: application/json
       Schema: appKeyListResponse
-
-PARAMETERS /v2/apps/{appId}/keys/{keyId}
 
 GET /v2/apps/{appId}/keys/{keyId}
   Summary: Get App Key
@@ -272,8 +266,6 @@ DELETE /v2/apps/{appId}/keys/{keyId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/attachments
-
 POST /v2/apps/{appId}/attachments
   Summary: Upload Attachment
   Request Body:
@@ -287,8 +279,6 @@ POST /v2/apps/{appId}/attachments
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/attachments/remove
-
 POST /v2/apps/{appId}/attachments/remove
   Summary: Delete Attachment
   Request Body:
@@ -301,8 +291,6 @@ POST /v2/apps/{appId}/attachments/remove
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/conversations
 
 POST /v2/apps/{appId}/conversations
   Summary: Create Conversation
@@ -320,8 +308,8 @@ POST /v2/apps/{appId}/conversations
 GET /v2/apps/{appId}/conversations
   Summary: List Conversations
   Parameters:
-    - undefined (undefined, unknown (optional)): No description
-    - undefined (undefined, unknown (optional)): No description
+    - page (query, page (optional)): Contains parameters for applying cursor pagination.
+    - filter (query, Object (userId, userExternalId) (required)): Contains parameters for filtering the results.
   Responses:
     200: Ok
       Content: application/json
@@ -332,8 +320,6 @@ GET /v2/apps/{appId}/conversations
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}
 
 GET /v2/apps/{appId}/conversations/{conversationId}
   Summary: Get Conversation
@@ -371,8 +357,6 @@ DELETE /v2/apps/{appId}/conversations/{conversationId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/join
-
 POST /v2/apps/{appId}/conversations/{conversationId}/join
   Summary: Join Conversation
   Request Body:
@@ -389,12 +373,10 @@ POST /v2/apps/{appId}/conversations/{conversationId}/join
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/participants
-
 GET /v2/apps/{appId}/conversations/{conversationId}/participants
   Summary: List Participants
   Parameters:
-    - undefined (undefined, unknown (optional)): No description
+    - page (query, page (optional)): Contains parameters for applying cursor pagination.
   Responses:
     200: Ok
       Content: application/json
@@ -405,8 +387,6 @@ GET /v2/apps/{appId}/conversations/{conversationId}/participants
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/leave
 
 POST /v2/apps/{appId}/conversations/{conversationId}/leave
   Summary: Leave Conversation
@@ -420,8 +400,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/leave
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/messages
 
 POST /v2/apps/{appId}/conversations/{conversationId}/messages
   Summary: Post Message
@@ -441,7 +419,7 @@ POST /v2/apps/{appId}/conversations/{conversationId}/messages
 GET /v2/apps/{appId}/conversations/{conversationId}/messages
   Summary: List Messages
   Parameters:
-    - undefined (undefined, unknown (optional)): No description
+    - page (query, page (optional)): Contains parameters for applying cursor pagination.
   Responses:
     200: Ok
       Content: application/json
@@ -460,8 +438,6 @@ DELETE /v2/apps/{appId}/conversations/{conversationId}/messages
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/messages/{messageId}
-
 DELETE /v2/apps/{appId}/conversations/{conversationId}/messages/{messageId}
   Summary: Delete Message
   Responses:
@@ -472,8 +448,6 @@ DELETE /v2/apps/{appId}/conversations/{conversationId}/messages/{messageId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/activity
-
 POST /v2/apps/{appId}/conversations/{conversationId}/activity
   Summary: Post Activity
   Request Body:
@@ -483,8 +457,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/activity
     200: Ok
       Content: application/json
       Schema: object
-
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/acceptControl
 
 POST /v2/apps/{appId}/conversations/{conversationId}/acceptControl
   Summary: Accept Control
@@ -502,8 +474,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/acceptControl
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/offerControl
-
 POST /v2/apps/{appId}/conversations/{conversationId}/offerControl
   Summary: Offer Control
   Request Body:
@@ -517,8 +487,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/offerControl
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/passControl
-
 POST /v2/apps/{appId}/conversations/{conversationId}/passControl
   Summary: Pass Control
   Request Body:
@@ -531,8 +499,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/passControl
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/releaseControl
 
 POST /v2/apps/{appId}/conversations/{conversationId}/releaseControl
   Summary: Release Control
@@ -550,8 +516,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/releaseControl
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/download
-
 POST /v2/apps/{appId}/conversations/{conversationId}/download
   Summary: Download Message Ref
   Request Body:
@@ -562,8 +526,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/download
       Content: application/json
       Schema: object
 
-PARAMETERS /v2/apps/{appId}/conversations/{conversationId}/conversionEvents
-
 POST /v2/apps/{appId}/conversations/{conversationId}/conversionEvents
   Summary: Post Conversion Events
   Request Body:
@@ -573,8 +535,6 @@ POST /v2/apps/{appId}/conversations/{conversationId}/conversionEvents
     200: Ok
       Content: application/json
       Schema: conversionEventsResponse
-
-PARAMETERS /v2/apps/{appId}/integrations
 
 POST /v2/apps/{appId}/integrations
   Summary: Create Integration
@@ -592,8 +552,8 @@ POST /v2/apps/{appId}/integrations
 GET /v2/apps/{appId}/integrations
   Summary: List Integrations
   Parameters:
-    - undefined (undefined, unknown (optional)): No description
-    - undefined (undefined, unknown (optional)): No description
+    - page (query, page (optional)): Contains parameters for applying cursor pagination.
+    - filter (query, Object (types) (optional)): Contains parameters for filtering the results.
   Responses:
     200: Ok
       Content: application/json
@@ -601,8 +561,6 @@ GET /v2/apps/{appId}/integrations
     400: Bad request
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/integrations/{integrationId}
 
 GET /v2/apps/{appId}/integrations/{integrationId}
   Summary: Get Integration
@@ -640,8 +598,6 @@ DELETE /v2/apps/{appId}/integrations/{integrationId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/keys
-
 POST /v2/apps/{appId}/integrations/{integrationId}/keys
   Summary: Create Integration Key
   Request Body:
@@ -662,8 +618,6 @@ GET /v2/apps/{appId}/integrations/{integrationId}/keys
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/keys/{keyId}
-
 GET /v2/apps/{appId}/integrations/{integrationId}/keys/{keyId}
   Summary: Get Integration Key
   Responses:
@@ -677,8 +631,6 @@ DELETE /v2/apps/{appId}/integrations/{integrationId}/keys/{keyId}
     200: Ok
       Content: application/json
       Schema: object
-
-PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/webhooks
 
 POST /v2/apps/{appId}/integrations/{integrationId}/webhooks
   Summary: Create Webhook
@@ -711,8 +663,6 @@ GET /v2/apps/{appId}/integrations/{integrationId}/webhooks
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/integrations/{integrationId}/webhooks/{webhookId}
 
 GET /v2/apps/{appId}/integrations/{integrationId}/webhooks/{webhookId}
   Summary: Get Webhook
@@ -750,8 +700,6 @@ DELETE /v2/apps/{appId}/integrations/{integrationId}/webhooks/{webhookId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/switchboards
-
 POST /v2/apps/{appId}/switchboards
   Summary: Create Switchboard
   Responses:
@@ -775,8 +723,6 @@ GET /v2/apps/{appId}/switchboards
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/switchboards/{switchboardId}
-
 PATCH /v2/apps/{appId}/switchboards/{switchboardId}
   Summary: Update Switchboard
   Request Body:
@@ -799,8 +745,6 @@ DELETE /v2/apps/{appId}/switchboards/{switchboardId}
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations
 
 POST /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations
   Summary: Create Switchboard Integration
@@ -828,8 +772,6 @@ GET /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations/{switchboardIntegrationId}
-
 PATCH /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations/{switchboardIntegrationId}
   Summary: Update Switchboard Integration
   Request Body:
@@ -853,8 +795,6 @@ DELETE /v2/apps/{appId}/switchboards/{switchboardId}/switchboardIntegrations/{sw
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/users
-
 POST /v2/apps/{appId}/users
   Summary: Create User
   Request Body:
@@ -867,8 +807,6 @@ POST /v2/apps/{appId}/users
     409: Conflict
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}
 
 GET /v2/apps/{appId}/users/{userIdOrExternalId}
   Summary: Get User
@@ -903,8 +841,6 @@ DELETE /v2/apps/{appId}/users/{userIdOrExternalId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/clients
-
 POST /v2/apps/{appId}/users/{userIdOrExternalId}/clients
   Summary: Create Client
   Request Body:
@@ -918,7 +854,7 @@ POST /v2/apps/{appId}/users/{userIdOrExternalId}/clients
 GET /v2/apps/{appId}/users/{userIdOrExternalId}/clients
   Summary: List Clients
   Parameters:
-    - undefined (undefined, unknown (optional)): No description
+    - page (query, page (optional)): Contains parameters for applying cursor pagination.
   Responses:
     200: Ok
       Content: application/json
@@ -926,8 +862,6 @@ GET /v2/apps/{appId}/users/{userIdOrExternalId}/clients
     400: Bad request
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/clients/{clientId}
 
 DELETE /v2/apps/{appId}/users/{userIdOrExternalId}/clients/{clientId}
   Summary: Remove Client
@@ -942,16 +876,12 @@ DELETE /v2/apps/{appId}/users/{userIdOrExternalId}/clients/{clientId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/devices
-
 GET /v2/apps/{appId}/users/{userIdOrExternalId}/devices
   Summary: List Devices
   Responses:
     200: Ok
       Content: application/json
       Schema: deviceListResponse
-
-PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/devices/{deviceId}
 
 GET /v2/apps/{appId}/users/{userIdOrExternalId}/devices/{deviceId}
   Summary: Get Device
@@ -963,8 +893,6 @@ GET /v2/apps/{appId}/users/{userIdOrExternalId}/devices/{deviceId}
       Content: application/json
       Schema: errorResponse
 
-PARAMETERS /v2/apps/{appId}/users/{userIdOrExternalId}/personalinformation
-
 DELETE /v2/apps/{appId}/users/{userIdOrExternalId}/personalinformation
   Summary: Delete User Personal Information
   Responses:
@@ -974,8 +902,6 @@ DELETE /v2/apps/{appId}/users/{userIdOrExternalId}/personalinformation
     404: Not found
       Content: application/json
       Schema: errorResponse
-
-PARAMETERS /v2/apps/{appId}/users/{zendeskId}/sync
 
 POST /v2/apps/{appId}/users/{zendeskId}/sync
   Summary: Synchronize User
@@ -997,10 +923,10 @@ GET /v2/tokenInfo
 GET /oauth/authorize
   Summary: Authorize
   Parameters:
-    - undefined (undefined, unknown (optional)): No description
-    - undefined (undefined, unknown (optional)): No description
-    - undefined (undefined, unknown (optional)): No description
-    - undefined (undefined, unknown (optional)): No description
+    - client_id (query, string (required)): Your integration’s unique identifier
+    - response_type (query, string (required)): For now the only acceptable value is code.
+    - state (query, string (optional)): You may pass in any arbitrary string value here which will be returned to you along with the code via browser redirect.
+    - redirect_uri (query, string (optional)): You may pass in a redirect_uri to determine which URI the response is redirected to. This URI must be contained in the list configured by your integration. If this option is not passed, the first URI present in the list will be used.
   Responses:
     302: Found
       Content: text/plain
@@ -1024,15 +950,16 @@ DELETE /oauth/authorization
       Schema: object
 
 SCHEMAS:
+> * = required
 
-page:
+page: object
   - after: string
   - before: string
   - size: integer
 
-displayName:
+displayName: string
 
-appSettings:
+appSettings: object
   - conversationRetentionSeconds: integer
   - maskCreditCardNumbers: boolean
   - useAnimalNames: boolean
@@ -1041,135 +968,149 @@ appSettings:
   - multiConvoEnabled: boolean
   - appLocalizationEnabled: boolean
 
-metadata:
+metadata: object
 
-app:
+app: object
   - id: string
-  - displayName: object
+  - displayName: displayName
   - settings: object
   - metadata: object
 
-meta:
+meta: object
   - hasMore: boolean
   - afterCursor: string
   - beforeCursor: string
 
-links:
+links: object
   - prev: string
   - next: string
 
-appListResponse:
+appListResponse: object
   - apps: array
   - meta: object
   - links: object
 
-error:
+error: object
   - code: string
   - title: string
 
-errorResponse:
+errorResponse: object
   - errors: array
 
-appCreateBody:
-  - displayName: object (required)
+appCreateBody: object
+  - displayName*: displayName
   - settings: object
   - metadata: object
 
-appResponse:
-  - app: object
+appResponse: object
+  - app: app
 
-appUpdateBody:
-  - displayName: object
+appUpdateBody: object
+  - displayName: displayName
   - settings: object
   - metadata: object
 
-appKey:
+appKey: object
   - id: string
   - displayName: string
   - secret: string
 
-appKeyListResponse:
+appKeyListResponse: object
   - keys: array
 
-appKeyResponse:
-  - key: object
+appKeyResponse: object
+  - key: appKey
 
-attachmentUploadBody:
-  - source: string (format: binary) (required)
+attachmentUploadBody: object
+  - source*: string (format: binary)
 
-attachmentSchema:
+attachmentSchema: object
   - mediaUrl: string
   - mediaType: string
 
-attachmentResponse:
-  - attachment: object
+attachmentResponse: object
+  - attachment: attachmentSchema
 
-attachmentDeleteBody:
-  - mediaUrl: string (required)
+attachmentDeleteBody: object
+  - mediaUrl*: string
 
-conversationType:
+conversationType: string [personal, sdkGroup]
 
-name:
+name: string
 
-switchboardIntegrationId:
+switchboardIntegrationId: string
 
-switchboardIntegrationType:
+switchboardIntegrationType: string
 
-switchboardIntegrationWebhook:
+switchboardIntegrationWebhook: object
   - id: string
   - name: object
   - integrationId: object
   - integrationType: object
 
-conversationTruncated:
+conversationTruncated: object
   - id: string
   - type: object
   - metadata: object
-  - activeSwitchboardIntegration: object
-  - pendingSwitchboardIntegration: object
+  - activeSwitchboardIntegration: switchboardIntegrationWebhook
+  - pendingSwitchboardIntegration: switchboardIntegrationWebhook
 
-description:
+description: string
 
-icon:
+icon: string (format: uri)
 
-conversation:
-  allOf composition
+conversation: allOf [conversationTruncated, <conversation__inline__1>]
 
-conversationListResponse:
+<conversation__inline__1>: object
+  - isDefault: boolean
+  - displayName: displayName
+  - description: object
+  - iconUrl: object
+  - businessLastRead: string
+  - lastUpdatedAt: string
+  - createdAt: string
+
+conversationListResponse: object
   - conversations: array
   - meta: object
   - links: object
 
-participantSubSchema:
-  anyOf composition
+participantSubSchema: anyOf [<participantSubSchema__inline__1>, <participantSubSchema__inline__2>]
 
-conversationCreateBody:
-  - type: object (required)
+<participantSubSchema__inline__1>: object
+  - userId: string
+  - subscribeSDKClient: boolean
+
+<participantSubSchema__inline__2>: object
+  - userExternalId: string
+  - subscribeSDKClient: boolean
+
+conversationCreateBody: object
+  - type*: object
   - participants: array
-  - displayName: object
+  - displayName: displayName
   - description: object
   - iconUrl: object
   - metadata: object
 
-conversationResponse:
-  - conversation: object
+conversationResponse: object
+  - conversation: conversation
 
-conversationUpdateBody:
-  - displayName: object
+conversationUpdateBody: object
+  - displayName: displayName
   - description: object
   - iconUrl: object
   - metadata: object
 
-participantJoinBody:
-  allOf composition
+participantJoinBody: allOf [participantSubSchema]
 
-clientType:
+clientType: string [apple, gbm, googlercs, instagram, kakao, line, mailgun, messagebird, messenger, slackconnect, sdk, telegram, twilio, twitter, viber, wechat, whatsapp]
 
-clientAssociation:
+clientAssociation: object
   - type: object
   - clientId: string
 
-participant:
+participant: object
   - id: string
   - userId: string
   - unreadCount: integer
@@ -1177,89 +1118,95 @@ participant:
   - userExternalId: string
   - lastRead: string
 
-participantListResponse:
+participantListResponse: object
   - participants: array
   - meta: object
   - links: object
 
-participantLeaveBody:
-  oneOf composition
+participantLeaveBody: oneOf [<participantLeaveBody__inline__1>, <participantLeaveBody__inline__2>, <participantLeaveBody__inline__3>]
 
-author:
-  - type: string (required)
+<participantLeaveBody__inline__1>: object
+  - userId: string
+
+<participantLeaveBody__inline__2>: object
+  - userExternalId: string
+
+<participantLeaveBody__inline__3>: object
+  - participantId: string
+
+author: object
+  - type*: string [business, user]
   - subtypes: array
   - userId: string
   - userExternalId: string
   - displayName: string
-  - avatarUrl: object
+  - avatarUrl: icon
 
-ticketClosed:
-  - type: string (required)
+ticketClosed: object
+  - type*: string [ticket:closed]
   - data: object
 
-transferToEmail:
-  - type: string (required)
+transferToEmail: object
+  - type*: string [ticket:transfer:email]
   - data: object
 
-activityMessage:
-  oneOf composition
+activityMessage: oneOf [ticketClosed, transferToEmail]
 
-htmlText:
+htmlText: string
 
-markdownText:
+markdownText: string
 
-buy:
-  - type: string (required)
-  - text: string (required)
-  - amount: integer (required)
+buy: object
+  - type*: string
+  - text*: string
+  - amount*: integer
   - currency: string
   - metadata: object
 
-extraChannelOptions:
+extraChannelOptions: object
   - messenger: object
 
-link:
-  - type: string (required)
-  - uri: string (required)
-  - text: string (required)
+link: object
+  - type*: string
+  - uri*: string
+  - text*: string
   - default: boolean
   - metadata: object
   - extraChannelOptions: object
 
-locationRequest:
-  - type: string (required)
-  - text: string (required)
+locationRequest: object
+  - type*: string
+  - text*: string
   - metadata: object
 
-postback:
-  - type: string (required)
-  - text: string (required)
-  - payload: string (required)
+postback: object
+  - type*: string
+  - text*: string
+  - payload*: string
   - metadata: object
 
-reply:
-  - type: string (required)
-  - text: string (required)
-  - payload: string (required)
+reply: object
+  - type*: string
+  - text*: string
+  - payload*: string
   - metadata: object
   - iconUrl: string
 
-webview:
-  - type: string (required)
-  - uri: string (required)
-  - text: string (required)
+webview: object
+  - type*: string
+  - uri*: string
+  - text*: string
   - default: boolean
   - metadata: object
   - extraChannelOptions: object
-  - size: string
-  - fallback: string (required)
+  - size: string [compact, tall, full]
+  - fallback*: string
   - openOnReceive: boolean
 
-action:
-  oneOf composition
+action: oneOf [buy, link, locationRequest, postback, reply, webview]
 
-textMessage:
-  - type: string (required)
+textMessage: object
+  - type*: string
   - text: string
   - htmlText: object
   - blockChatInput: boolean
@@ -1267,29 +1214,28 @@ textMessage:
   - actions: array
   - payload: string
 
-actionSubset:
-  oneOf composition
+actionSubset: oneOf [buy, link, postback, webview]
 
-item:
-  - title: string (required)
+item: object
+  - title*: string
   - description: string
   - mediaUrl: string (format: uri)
   - mediaType: string
   - altText: string
-  - size: string
-  - actions: array (required)
+  - size: string [compact, large]
+  - actions*: array
   - metadata: object
 
-carouselMessage:
-  - type: string (required)
+carouselMessage: object
+  - type*: string
   - text: string
   - blockChatInput: boolean
-  - items: array (required)
+  - items*: array
   - displaySettings: object
 
-fileMessage:
-  - type: string (required)
-  - mediaUrl: string (format: uri) (required)
+fileMessage: object
+  - type*: string
+  - mediaUrl*: string (format: uri)
   - mediaSize: number
   - mediaType: string
   - altText: string
@@ -1299,37 +1245,44 @@ fileMessage:
   - markdownText: object
   - attachmentId: string
 
-field:
-  - type: string (required)
-  - name: string (required)
-  - label: string (required)
+field: object
+  - type*: string [email, select, text]
+  - name*: string
+  - label*: string
   - text: string
   - email: string
   - select: array
 
-formOptions:
-  Array of object
+formOptions: array
+  items: object
 
-formMessageField:
-  allOf composition
+formMessageField: allOf [field, <formMessageField__inline__1>]
 
-formMessage:
-  - type: string (required)
+<formMessageField__inline__1>: object
+  - placeholder: string
+  - minSize: integer
+  - maxSize: integer
+  - options: object
+
+formMessage: object
+  - type*: string
   - submitted: boolean
   - blockChatInput: boolean
-  - fields: array (required)
+  - fields*: array
 
-formResponseMessageField:
-  allOf composition
+formResponseMessageField: allOf [field, <formResponseMessageField__inline__1>]
 
-formResponseMessage:
-  - type: string (required)
-  - fields: array (required)
+<formResponseMessageField__inline__1>: object
+  - quotedMessageId: string
+
+formResponseMessage: object
+  - type*: string
+  - fields*: array
   - textFallback: string
 
-imageMessage:
-  - type: string (required)
-  - mediaUrl: string (format: uri) (required)
+imageMessage: object
+  - type*: string
+  - mediaUrl*: string (format: uri)
   - mediaType: string
   - mediaSize: number
   - altText: string
@@ -1340,31 +1293,30 @@ imageMessage:
   - actions: array
   - attachmentId: string
 
-listMessage:
-  - type: string (required)
+listMessage: object
+  - type*: string
   - blockChatInput: boolean
-  - items: array (required)
+  - items*: array
   - actions: array
 
-locationMessage:
-  - type: string (required)
+locationMessage: object
+  - type*: string
   - text: string
   - blockChatInput: boolean
-  - coordinates: object (required)
+  - coordinates*: object
   - location: object
 
-templateMessage:
-  - type: string (required)
+templateMessage: object
+  - type*: string
   - blockChatInput: boolean
-  - template: object (required)
+  - template*: object
 
-content:
-  oneOf composition
+content: oneOf [textMessage, carouselMessage, fileMessage, formMessage, formResponseMessage, imageMessage, listMessage, locationMessage, templateMessage]
 
-client:
+client: object
   - id: string
   - type: object
-  - status: string
+  - status: string [active, blocked, inactive, pending]
   - integrationId: string
   - externalId: string
   - lastSeen: string
@@ -1374,557 +1326,820 @@ client:
   - info: object
   - raw: object
 
-device:
+device: object
   - id: string
-  - type: string
+  - type: string [android, ios, web]
   - guid: string
   - clientId: string
-  - status: string
+  - status: string [active, inactive]
   - integrationId: string
   - lastSeen: string
   - pushNotificationToken: string
   - info: object
   - appVersion: string
 
-source:
-  - type: string (required)
+source: object
+  - type*: string
   - integrationId: string
   - originalMessageId: string
   - originalMessageTimestamp: string
-  - client: object
-  - device: object
+  - client: client
+  - device: device
 
-message:
+message: object
   - id: string
   - received: string
   - author: object
-  - activity: object
-  - content: object
+  - activity: activityMessage
+  - content: content
   - source: object
-  - quotedMessage: object
-  - metadata: object
+  - quotedMessage: quotedMessage
+  - metadata: metadata
   - deleted: boolean
 
-quotedMessageMessage:
-  - type: string (required)
-  - message: object
+quotedMessageMessage: object
+  - type*: string
+  - message: message
 
-quotedMessageExternalMessageId:
-  - type: string (required)
+quotedMessageExternalMessageId: object
+  - type*: string
   - externalMessageId: string
 
-quotedMessage:
-  oneOf composition
+quotedMessage: oneOf [quotedMessageMessage, quotedMessageExternalMessageId]
 
-messageListResponse:
+messageListResponse: object
   - messages: array
   - meta: object
   - links: object
 
-destination:
-  oneOf composition
+destination: oneOf [<destination__inline__1>, <destination__inline__2>]
 
-appleMessageOverridePayload:
+<destination__inline__1>: object
+  - integrationId: string
+
+<destination__inline__2>: object
+  - integrationType: string
+
+appleMessageOverridePayload: object
   - payload: object
   - withCapabilities: array
 
-messageOverridePayload:
+messageOverridePayload: object
   - payload: object
 
-messageOverride:
-  anyOf composition
+messageOverride: anyOf [<messageOverride__inline__1>, <messageOverride__inline__2>, <messageOverride__inline__3>, <messageOverride__inline__4>]
 
-messagePost:
-  - author: object (required)
-  - content: object (required)
+<messageOverride__inline__1>: object
+  - apple: object
+
+<messageOverride__inline__2>: object
+  - line: object
+
+<messageOverride__inline__3>: object
+  - messenger: object
+
+<messageOverride__inline__4>: object
+  - whatsapp: object
+
+messagePost: object
+  - author*: author
+  - content*: content
   - destination: object
   - metadata: object
   - override: object
   - schema: string
 
-messagePostResponse:
+messagePostResponse: object
   - messages: array
 
-activityTypes:
-  - type: string
+activityTypes: object
+  - type: string [conversation:read, typing:start, typing:stop]
 
-activityPost:
-  allOf composition
+activityPost: allOf [<activityPost__inline__1>, activityTypes]
 
-acceptControlBody:
-  - metadata: object
+<activityPost__inline__1>: object
+  - author: author
 
-offerControlBody:
-  - switchboardIntegration: string (required)
-  - metadata: object
+acceptControlBody: object
+  - metadata: metadata
 
-passControlBody:
-  - switchboardIntegration: string (required)
-  - reason: string
-  - metadata: object
+offerControlBody: object
+  - switchboardIntegration*: string
+  - metadata: metadata
 
-releaseControlBody:
-  - reason: string
-  - metadata: object
+passControlBody: object
+  - switchboardIntegration*: string
+  - reason: string [ticketClosed, transferToEmail]
+  - metadata: metadata
 
-downloadMessageRefBody:
-  allOf composition
+releaseControlBody: object
+  - reason: string [ticketClosed, transferToEmail]
+  - metadata: metadata
 
-metaConversionEvent:
-  - payload: object (required)
+downloadMessageRefBody: allOf [<downloadMessageRefBody__inline__1>]
 
-conversionEventsBody:
-  oneOf composition
+<downloadMessageRefBody__inline__1>: object
+  - userId: string
+  - apple: object
 
-conversionEvents:
+metaConversionEvent: object
+  - payload*: object
+
+conversionEventsBody: oneOf [<conversionEventsBody__inline__1>, <conversionEventsBody__inline__2>, <conversionEventsBody__inline__3>]
+
+<conversionEventsBody__inline__1>: object
+  - messenger: object
+
+<conversionEventsBody__inline__2>: object
+  - instagram: object
+
+<conversionEventsBody__inline__3>: object
+  - whatsapp: object
+
+conversionEvents: object
   - datasetId: string
   - eventsReceived: integer
 
-conversionEventsResponse:
+conversionEventsResponse: object
   - conversionEvents: object
 
-integration:
+integration: object
   - id: string
-  - type: string (required)
+  - type*: string
   - status: object
   - displayName: string
 
-defaultResponderId:
+defaultResponderId: object
   - defaultResponderId: string
 
-defaultResponder:
+defaultResponder: object
   - defaultResponder: object
 
-android:
-  allOf composition
+android: allOf [integration, <android__inline__1>, defaultResponderId, defaultResponder]
 
-apple:
-  allOf composition
+<android__inline__1>: object
+  - type: string
+  - projectId: string
+  - clientEmail: string
+  - privateKey: string
+  - serverKey: string
+  - senderId: string
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
+  - attachmentsEnabled: boolean
 
-target:
+apple: allOf [integration, <apple__inline__1>, defaultResponderId, defaultResponder]
 
-triggers:
-  Array of string
+<apple__inline__1>: object
+  - type: string
+  - businessId*: string
+  - apiSecret*: string
+  - mspId*: string
+  - authenticationMessageSecret: string
 
-includeFullUser:
+target: string
 
-includeFullSource:
+triggers: array
+  items: string
 
-webhook:
+includeFullUser: boolean
+
+includeFullSource: boolean
+
+webhook: object
   - id: string
   - version: string
-  - target: object (required)
-  - triggers: object (required)
+  - target*: object
+  - triggers*: object
   - secret: string
   - includeFullUser: object
   - includeFullSource: object
 
-custom:
-  allOf composition
+custom: allOf [integration, <custom__inline__1>]
 
-instagram:
-  allOf composition
+<custom__inline__1>: object
+  - type: string
+  - webhooks*: array
 
-ios:
-  allOf composition
+instagram: allOf [integration, <instagram__inline__1>, defaultResponderId, defaultResponder]
 
-line:
-  allOf composition
+<instagram__inline__1>: object
+  - type: string
+  - pageAccessToken*: string
+  - appId*: string
+  - appSecret*: string
+  - businessName: string
+  - businessUsername: string
+  - pageId: string
+  - businessId: string
+  - username: string
+  - userId: string
 
-mailgun:
-  allOf composition
+ios: allOf [integration, <ios__inline__1>, defaultResponderId, defaultResponder]
 
-messagebird:
-  allOf composition
+<ios__inline__1>: object
+  - type: string
+  - certificate: string
+  - password: string
+  - production: boolean
+  - autoUpdateBadge: boolean
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
+  - attachmentsEnabled: boolean
 
-messenger:
-  allOf composition
+line: allOf [integration, <line__inline__1>, defaultResponderId, defaultResponder]
 
-telegram:
-  allOf composition
+<line__inline__1>: object
+  - type: string
+  - channelId: string
+  - channelSecret: string
+  - channelAccessToken: string
+  - serviceCode: string
+  - switcherSecret: string
+  - qrCodeUrl: string
+  - lineId: string
 
-twilio:
-  allOf composition
+mailgun: allOf [integration, <mailgun__inline__1>, defaultResponderId, defaultResponder]
 
-twitter:
-  allOf composition
+<mailgun__inline__1>: object
+  - type: string
+  - apiKey*: string
+  - domain*: string
+  - incomingAddress*: string
+  - hideUnsubscribeLink: boolean
+  - fromAddress: string
 
-unity:
-  allOf composition
+messagebird: allOf [integration, <messagebird__inline__1>, defaultResponderId, defaultResponder]
 
-viber:
-  allOf composition
+<messagebird__inline__1>: object
+  - type: string
+  - accessKey*: string
+  - signingKey*: string
+  - originator*: string
+  - webhookSecret: string
 
-prechatCapture:
+messenger: allOf [integration, <messenger__inline__1>, defaultResponderId, defaultResponder]
+
+<messenger__inline__1>: object
+  - type: string
+  - pageAccessToken*: string
+  - appId*: string
+  - appSecret*: string
+  - pageId: number
+  - pageName: string
+
+telegram: allOf [integration, <telegram__inline__1>, defaultResponderId, defaultResponder]
+
+<telegram__inline__1>: object
+  - type: string
+  - token*: string
+  - username: string
+  - botId: string
+
+twilio: allOf [integration, <twilio__inline__1>, defaultResponderId, defaultResponder]
+
+<twilio__inline__1>: object
+  - type: string
+  - accountSid*: string
+  - authToken*: string
+  - phoneNumberSid: string
+  - messagingServiceSid: string
+
+twitter: allOf [integration, <twitter__inline__1>, defaultResponderId, defaultResponder]
+
+<twitter__inline__1>: object
+  - type: string
+  - tier*: string [enterprise]
+  - envName: string
+  - consumerKey*: string
+  - consumerSecret*: string
+  - accessTokenKey*: string
+  - accessTokenSecret*: string
+
+unity: allOf [integration, <unity__inline__1>, defaultResponderId, defaultResponder]
+
+<unity__inline__1>: object
+  - type: string
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
+  - attachmentsEnabled: boolean
+
+viber: allOf [integration, <viber__inline__1>, defaultResponderId, defaultResponder]
+
+<viber__inline__1>: object
+  - type: string
+  - token*: string
+  - uri: string
+  - accountId: string
+
+prechatCapture: object
   - avatarUrl: string
   - enabled: boolean
   - enableEmailLinking: boolean
   - fields: array
 
-web:
-  allOf composition
+web: allOf [integration, <web__inline__1>, defaultResponderId, defaultResponder]
 
-whatsapp:
-  allOf composition
+<web__inline__1>: object
+  - type: string
+  - brandColor: string
+  - fixedIntroPane: boolean
+  - conversationColor: string
+  - actionColor: string
+  - displayStyle: string
+  - buttonIconUrl: string
+  - buttonWidth: string
+  - buttonHeight: string
+  - integrationOrder: array
+  - businessName: string
+  - businessIconUrl: string
+  - backgroundImageUrl: string
+  - originWhitelist: array
+  - prechatCapture: prechatCapture
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
+  - attachmentsEnabled: boolean
 
-status:
+whatsapp: allOf [integration, <whatsapp__inline__1>, defaultResponderId, defaultResponder]
 
-integrationListResponse:
+<whatsapp__inline__1>: object
+  - type: string
+  - hsmFallbackLanguage: string
+  - accountId: string
+  - accountManagementAccessToken: string
+  - phoneNumber: string
+
+status: string [inactive, active, error]
+
+integrationListResponse: object
   - integrations: array
   - meta: object
   - links: object
 
-integrationResponse:
+integrationResponse: object
   - integration: object
 
-integrationUpdateBase:
+integrationUpdateBase: object
   - displayName: string
   - defaultResponderId: string
 
-androidUpdate:
-  allOf composition
+androidUpdate: allOf [integrationUpdateBase, <androidUpdate__inline__1>]
 
-appleUpdate:
-  allOf composition
+<androidUpdate__inline__1>: object
+  - projectId: string
+  - clientEmail: string
+  - privateKey: string
+  - serverKey: string
+  - senderId: string
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
 
-customUpdate:
+appleUpdate: allOf [integrationUpdateBase, <appleUpdate__inline__1>]
+
+<appleUpdate__inline__1>: object
+  - authenticationMessageSecret: string
+
+customUpdate: object
   - displayName: string
 
-instagramUpdate:
-  allOf composition
+instagramUpdate: allOf [integrationUpdateBase, <instagramUpdate__inline__1>]
 
-iosUpdate:
-  allOf composition
+<instagramUpdate__inline__1>: object
+  - pageAccessToken: string
 
-lineUpdate:
-  allOf composition
+iosUpdate: allOf [integrationUpdateBase, <iosUpdate__inline__1>]
 
-mailgunUpdate:
-  allOf composition
+<iosUpdate__inline__1>: object
+  - certificate: string
+  - password: string
+  - production: boolean
+  - autoUpdateBadge: boolean
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
 
-messageBirdUpdate:
-  allOf composition
+lineUpdate: allOf [integrationUpdateBase]
 
-messengerUpdate:
-  allOf composition
+mailgunUpdate: allOf [integrationUpdateBase, <mailgunUpdate__inline__1>]
 
-telegramUpdate:
-  allOf composition
+<mailgunUpdate__inline__1>: object
+  - hideUnsubscribeLink: boolean
+  - fromAddress: string
 
-twilioUpdate:
-  allOf composition
+messageBirdUpdate: allOf [integrationUpdateBase]
 
-twitterUpdate:
-  allOf composition
+messengerUpdate: allOf [integrationUpdateBase, <messengerUpdate__inline__1>]
 
-unityUpdate:
-  allOf composition
+<messengerUpdate__inline__1>: object
+  - pageAccessToken: string
 
-viberUpdate:
-  allOf composition
+telegramUpdate: allOf [integrationUpdateBase]
 
-webUpdate:
-  allOf composition
+twilioUpdate: allOf [integrationUpdateBase]
 
-whatsAppUpdate:
-  allOf composition
+twitterUpdate: allOf [integrationUpdateBase]
 
-integrationUpdate:
-  oneOf composition
+unityUpdate: allOf [integrationUpdateBase, <unityUpdate__inline__1>]
 
-apiKey:
+<unityUpdate__inline__1>: object
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
+
+viberUpdate: allOf [integrationUpdateBase]
+
+webUpdate: allOf [integrationUpdateBase, <webUpdate__inline__1>]
+
+<webUpdate__inline__1>: object
+  - brandColor: string
+  - fixedIntroPane: boolean
+  - conversationColor: string
+  - actionColor: string
+  - displayStyle: string
+  - buttonIconUrl: string
+  - buttonWidth: string
+  - buttonHeight: string
+  - integrationOrder: array
+  - businessName: string
+  - businessIconUrl: string
+  - backgroundImageUrl: string
+  - originWhitelist: array
+  - prechatCapture: prechatCapture
+  - canUserSeeConversationList: boolean
+  - canUserCreateMoreConversations: boolean
+
+whatsAppUpdate: allOf [integrationUpdateBase, <whatsAppUpdate__inline__1>]
+
+<whatsAppUpdate__inline__1>: object
+  - hsmFallbackLanguage: string
+  - accountId: string
+  - accountManagementAccessToken: string
+
+integrationUpdate: oneOf [androidUpdate, appleUpdate, customUpdate, instagramUpdate, iosUpdate, lineUpdate, mailgunUpdate, messageBirdUpdate, messengerUpdate, telegramUpdate, twilioUpdate, twitterUpdate, unityUpdate, viberUpdate, webUpdate, whatsAppUpdate]
+
+apiKey: object
   - id: string
-  - displayName: object
+  - displayName: displayName
   - secret: string
 
-integrationApiKeyResponse:
+integrationApiKeyResponse: object
   - key: object
 
-webhookListResponse:
+webhookListResponse: object
   - webhooks: array
 
-webhookBody:
+webhookBody: object
   - target: object
   - triggers: object
   - includeFullUser: object
   - includeFullSource: object
 
-webhookCreateBody:
-  allOf composition
+webhookCreateBody: allOf [webhookBody]
 
-webhookResponse:
-  - webhook: object
+webhookResponse: object
+  - webhook: webhook
 
-enabled:
+enabled: boolean
 
-defaultSwitchboardIntegrationId:
+defaultSwitchboardIntegrationId: string
 
-switchboard:
-  - id: string (required)
-  - enabled: object (required)
+switchboard: object
+  - id*: string
+  - enabled*: object
   - defaultSwitchboardIntegrationId: object
 
-switchboardListResponse:
+switchboardListResponse: object
   - switchboards: array
 
-switchboardResponse:
-  - switchboard: object
+switchboardResponse: object
+  - switchboard: switchboard
 
-switchboardUpdateBody:
+switchboardUpdateBody: object
   - enabled: object
   - defaultSwitchboardIntegrationId: object
 
-deliverStandbyEvents:
+deliverStandbyEvents: boolean
 
-nextSwitchboardIntegrationId:
+nextSwitchboardIntegrationId: string
 
-messageHistoryCount:
+messageHistoryCount: integer
 
-switchboardIntegration:
-  - id: string (required)
-  - name: object (required)
-  - integrationId: object (required)
-  - integrationType: object (required)
-  - deliverStandbyEvents: object (required)
+switchboardIntegration: object
+  - id*: string
+  - name*: object
+  - integrationId*: object
+  - integrationType*: object
+  - deliverStandbyEvents*: object
   - nextSwitchboardIntegrationId: object
   - messageHistoryCount: object
 
-switchboardIntegrationListResponse:
+switchboardIntegrationListResponse: object
   - switchboardIntegrations: array
 
-switchboardIntegrationCreateBody:
-  - name: object (required)
-  - integrationId: object
-  - integrationType: object
-  - deliverStandbyEvents: object
+switchboardIntegrationCreateBody: object
+  - name*: object
+  - integrationId: switchboardIntegrationId
+  - integrationType: switchboardIntegrationType
+  - deliverStandbyEvents: deliverStandbyEvents
   - nextSwitchboardIntegrationId: object
   - messageHistoryCount: object
 
-switchboardIntegrationResponse:
-  - switchboardIntegration: object
+switchboardIntegrationResponse: object
+  - switchboardIntegration: switchboardIntegration
 
-switchboardIntegrationUpdateBody:
+switchboardIntegrationUpdateBody: object
   - name: object
-  - integrationId: object
-  - integrationType: object
+  - integrationId: switchboardIntegrationId
+  - integrationType: switchboardIntegrationType
   - deliverStandbyEvents: object
   - nextSwitchboardIntegrationId: object
   - messageHistoryCount: object
 
-signedUpAt:
+signedUpAt: string
 
-toBeRetained:
+toBeRetained: boolean
 
-profile:
+profile: object
   - givenName: string
   - surname: string
   - email: string (format: email)
   - avatarUrl: string (format: uri)
   - locale: string
 
-userCreateBody:
-  - externalId: string (required)
+userCreateBody: object
+  - externalId*: string
   - signedUpAt: object
   - toBeRetained: object
   - profile: object
   - metadata: object
 
-userTruncated:
+userTruncated: object
   - id: string
   - authenticated: boolean
   - externalId: string
   - zendeskId: string
 
-identity:
+identity: object
   - type: string
   - value: string
   - verification: string
 
-user:
-  allOf composition
+user: allOf [userTruncated, <user__inline__1>]
 
-userResponse:
-  - user: object
+<user__inline__1>: object
+  - signedUpAt: signedUpAt
+  - toBeRetained: toBeRetained
+  - profile: profile
+  - metadata: metadata
+  - identities: array
 
-userUpdateBody:
-  - signedUpAt: object
-  - toBeRetained: object
-  - profile: object
+userResponse: object
+  - user: user
+
+userUpdateBody: object
+  - signedUpAt: signedUpAt
+  - toBeRetained: toBeRetained
+  - profile: profile
   - metadata: object
 
-clientListResponse:
+clientListResponse: object
   - clients: array
   - meta: object
   - links: object
 
-matchCriteriaMailgun:
-  allOf composition
+matchCriteriaMailgun: allOf [matchCriteriaBase, <matchCriteriaMailgun__inline__1>]
 
-matchCriteriaMessagebird:
-  allOf composition
+<matchCriteriaMailgun__inline__1>: object
+  - type: string
+  - address*: string
+  - subject: string
 
-matchCriteriaTwilio:
-  allOf composition
+matchCriteriaMessagebird: allOf [matchCriteriaBase, <matchCriteriaMessagebird__inline__1>]
 
-matchCriteriaWhatsapp:
-  allOf composition
+<matchCriteriaMessagebird__inline__1>: object
+  - type: string
+  - phoneNumber*: string
 
-matchCriteriaBase:
-  - type: string (required)
-  - integrationId: string (required)
+matchCriteriaTwilio: allOf [matchCriteriaBase, <matchCriteriaTwilio__inline__1>]
+
+<matchCriteriaTwilio__inline__1>: object
+  - type: string
+  - phoneNumber*: string
+
+matchCriteriaWhatsapp: allOf [matchCriteriaBase, <matchCriteriaWhatsapp__inline__1>]
+
+<matchCriteriaWhatsapp__inline__1>: object
+  - type: string
+  - phoneNumber*: string
+
+matchCriteriaBase: object
+  - type*: string
+  - integrationId*: string
   - primary: boolean
 
-matchCriteria:
-  oneOf composition
+matchCriteria: oneOf [matchCriteriaMailgun, matchCriteriaMessagebird, matchCriteriaTwilio, matchCriteriaWhatsapp]
 
-clientCreate:
-  - matchCriteria: object (required)
-  - confirmation: object (required)
-  - target: object (required)
+clientCreate: object
+  - matchCriteria*: object
+  - confirmation*: object
+  - target*: object
 
-deviceListResponse:
+deviceListResponse: object
   - devices: array
 
-deviceResponse:
-  - device: object
+deviceResponse: object
+  - device: device
 
-syncUserBody:
+syncUserBody: object
   - survivingZendeskId: string
 
-appSubSchema:
+appSubSchema: object
   - id: string
 
-webhookSubSchema:
+webhookSubSchema: object
   - id: string
   - version: string
 
-eventSubSchema:
+eventSubSchema: object
   - id: string
   - type: string
   - createdAt: string
 
-sourceWebhook:
+sourceWebhook: object
   - type: string
   - integrationId: string
   - originalMessageId: string
   - originalMessageTimestamp: string
-  - client: object
-  - device: object
+  - client: client
+  - device: device
 
-clientAddEvent:
-  allOf composition
+clientAddEvent: allOf [eventSubSchema, <clientAddEvent__inline__1>]
 
-clientRemoveEvent:
-  allOf composition
+<clientAddEvent__inline__1>: object
+  - payload: object
 
-clientUpdateEvent:
-  allOf composition
+clientRemoveEvent: allOf [eventSubSchema, <clientRemoveEvent__inline__1>]
 
-campaign:
+<clientRemoveEvent__inline__1>: object
+  - payload: object
+
+clientUpdateEvent: allOf [eventSubSchema, <clientUpdateEvent__inline__1>]
+
+<clientUpdateEvent__inline__1>: object
+  - payload: object
+
+campaign: object
   - id: string
 
-sourceWithCampaignWebhook:
-  allOf composition
+sourceWithCampaignWebhook: allOf [sourceWebhook, <sourceWithCampaignWebhook__inline__1>]
 
-referral:
+<sourceWithCampaignWebhook__inline__1>: object
+  - campaign: object
+
+referral: object
   - code: string
   - details: object
 
-conversationCreateEvent:
-  allOf composition
+conversationCreateEvent: allOf [eventSubSchema, <conversationCreateEvent__inline__1>]
 
-conversationJoinEvent:
-  allOf composition
+<conversationCreateEvent__inline__1>: object
+  - payload: object
 
-conversationLeaveEvent:
-  allOf composition
+conversationJoinEvent: allOf [eventSubSchema, <conversationJoinEvent__inline__1>]
 
-conversationRemoveEvent:
-  allOf composition
+<conversationJoinEvent__inline__1>: object
+  - payload: object
 
-conversationMessageDeliveryPayload:
-  - user: object
-  - conversation: object
+conversationLeaveEvent: allOf [eventSubSchema, <conversationLeaveEvent__inline__1>]
+
+<conversationLeaveEvent__inline__1>: object
+  - payload: object
+
+conversationRemoveEvent: allOf [eventSubSchema, <conversationRemoveEvent__inline__1>]
+
+<conversationRemoveEvent__inline__1>: object
+  - payload: object
+
+conversationMessageDeliveryPayload: object
+  - user: user
+  - conversation: conversationTruncated
   - message: object
   - destination: object
   - externalMessages: array
   - isFinalEvent: boolean
 
-conversationMessageDeliveryChannelEvent:
-  allOf composition
+conversationMessageDeliveryChannelEvent: allOf [eventSubSchema, <conversationMessageDeliveryChannelEvent__inline__1>]
 
-conversationMessageDeliveryFailureEvent:
-  allOf composition
+<conversationMessageDeliveryChannelEvent__inline__1>: object
+  - payload: object
 
-conversationMessageDeliveryUserEvent:
-  allOf composition
+conversationMessageDeliveryFailureEvent: allOf [eventSubSchema, <conversationMessageDeliveryFailureEvent__inline__1>]
 
-authorWebhook:
-  - type: string (required)
+<conversationMessageDeliveryFailureEvent__inline__1>: object
+  - payload: allOf [conversationMessageDeliveryPayload, object]
+
+conversationMessageDeliveryUserEvent: allOf [eventSubSchema, <conversationMessageDeliveryUserEvent__inline__1>]
+
+<conversationMessageDeliveryUserEvent__inline__1>: object
+  - payload: object
+
+authorWebhook: object
+  - type*: string [business, user]
   - userId: string
-  - user: object
+  - user: user
 
-messageWebhook:
+messageWebhook: object
   - id: string
   - received: string
   - author: object
-  - content: object
-  - source: object
-  - quotedMessage: object
-  - metadata: object
+  - content: content
+  - source: allOf [source, object]
+  - quotedMessage: quotedMessage
+  - metadata: metadata
   - deleted: boolean
 
-conversationMessageEvent:
-  allOf composition
+conversationMessageEvent: allOf [eventSubSchema, <conversationMessageEvent__inline__1>]
 
-postbackWebhook:
+<conversationMessageEvent__inline__1>: object
+  - payload: object
+
+postbackWebhook: object
   - payload: string
   - metadata: object
 
-conversationPostbackEvent:
-  allOf composition
+conversationPostbackEvent: allOf [eventSubSchema, <conversationPostbackEvent__inline__1>]
 
-activity:
-  allOf composition
+<conversationPostbackEvent__inline__1>: object
+  - payload: object
 
-conversationReadEvent:
-  allOf composition
+activity: allOf [activityTypes, <activity__inline__1>]
 
-conversationReferralEvent:
-  allOf composition
+<activity__inline__1>: object
+  - source: sourceWebhook
+  - author: object
 
-conversationTypingEvent:
-  allOf composition
+conversationReadEvent: allOf [eventSubSchema, <conversationReadEvent__inline__1>]
 
-switchboardAcceptControl:
-  allOf composition
+<conversationReadEvent__inline__1>: object
+  - payload: object
 
-switchboardAcceptControlFailure:
-  allOf composition
+conversationReferralEvent: allOf [eventSubSchema, <conversationReferralEvent__inline__1>]
 
-switchboardOfferControl:
-  allOf composition
+<conversationReferralEvent__inline__1>: object
+  - payload: object
 
-switchboardOfferControlFailure:
-  allOf composition
+conversationTypingEvent: allOf [eventSubSchema, <conversationTypingEvent__inline__1>]
 
-switchboardPassControl:
-  allOf composition
+<conversationTypingEvent__inline__1>: object
+  - payload: object
 
-switchboardPassControlFailure:
-  allOf composition
+switchboardAcceptControl: allOf [eventSubSchema, <switchboardAcceptControl__inline__1>]
 
-switchboardReleaseControl:
-  allOf composition
+<switchboardAcceptControl__inline__1>: object
+  - payload: object
 
-userMergeEvent:
-  allOf composition
+switchboardAcceptControlFailure: allOf [eventSubSchema, <switchboardAcceptControlFailure__inline__1>]
 
-userUpdateEvent:
-  allOf composition
+<switchboardAcceptControlFailure__inline__1>: object
+  - payload: object
 
-userRemoveEvent:
-  allOf composition
+switchboardOfferControl: allOf [eventSubSchema, <switchboardOfferControl__inline__1>]
+
+<switchboardOfferControl__inline__1>: object
+  - payload: object
+
+switchboardOfferControlFailure: allOf [eventSubSchema, <switchboardOfferControlFailure__inline__1>]
+
+<switchboardOfferControlFailure__inline__1>: object
+  - payload: object
+
+switchboardPassControl: allOf [eventSubSchema, <switchboardPassControl__inline__1>]
+
+<switchboardPassControl__inline__1>: object
+  - payload: object
+
+switchboardPassControlFailure: allOf [eventSubSchema, <switchboardPassControlFailure__inline__1>]
+
+<switchboardPassControlFailure__inline__1>: object
+  - payload: object
+
+switchboardReleaseControl: allOf [eventSubSchema, <switchboardReleaseControl__inline__1>]
+
+<switchboardReleaseControl__inline__1>: object
+  - payload: object
+
+userMergeEvent: allOf [eventSubSchema, <userMergeEvent__inline__1>]
+
+<userMergeEvent__inline__1>: object
+  - payload: object
+
+userUpdateEvent: allOf [eventSubSchema, <userUpdateEvent__inline__1>]
+
+<userUpdateEvent__inline__1>: object
+  - payload: object
+
+userRemoveEvent: allOf [eventSubSchema, <userRemoveEvent__inline__1>]
+
+<userRemoveEvent__inline__1>: object
+  - payload: object
 
 SECURITY:
 - HTTP bearer authentication

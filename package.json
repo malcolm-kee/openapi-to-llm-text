@@ -19,7 +19,8 @@
   "scripts": {
     "test": "vitest run",
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sync-examples": "pnpm build && node sync-examples.js"
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",

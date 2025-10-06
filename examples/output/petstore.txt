@@ -54,7 +54,7 @@ POST /pet
 GET /pet/findByStatus
   Summary: Finds Pets by status.
   Parameters:
-    - status (query, string (required)): Status values that need to be considered for filter
+    - status (query, string [available, pending, sold] (required)): Status values that need to be considered for filter
   Responses:
     200: successful operation
       Content: application/json
@@ -273,20 +273,21 @@ DELETE /user/{username}
     default: Unexpected error
 
 SCHEMAS:
+> * = required
 
-Order:
+Order: object
   - id: integer (format: int64)
   - petId: integer (format: int64)
   - quantity: integer (format: int32)
   - shipDate: string (format: date-time)
-  - status: string
+  - status: string [placed, approved, delivered]
   - complete: boolean
 
-Category:
+Category: object
   - id: integer (format: int64)
   - name: string
 
-User:
+User: object
   - id: integer (format: int64)
   - username: string
   - firstName: string
@@ -296,19 +297,19 @@ User:
   - phone: string
   - userStatus: integer (format: int32)
 
-Tag:
+Tag: object
   - id: integer (format: int64)
   - name: string
 
-Pet:
+Pet: object
   - id: integer (format: int64)
-  - name: string (required)
+  - name*: string
   - category: object
-  - photoUrls: array (required)
+  - photoUrls*: array
   - tags: array
-  - status: string
+  - status: string [available, pending, sold]
 
-ApiResponse:
+ApiResponse: object
   - code: integer (format: int32)
   - type: string
   - message: string
